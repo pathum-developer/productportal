@@ -46,6 +46,7 @@ logs/
 
 ### Database ###
 mysql-data/
+backups/
 *.db
 *.sqlite
 *.h2.db
