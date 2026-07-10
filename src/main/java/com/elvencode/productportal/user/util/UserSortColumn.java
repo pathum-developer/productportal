@@ -10,10 +10,9 @@ import lombok.Getter;
 @Getter
 public enum UserSortColumn {
     USERNAME("p.username", "username"),
+    FULL_NAME("p.fullName", "fullName"),
     EMAIL("p.email", "email"),
     PHONE_NUMBER("p.phoneNumber", "phoneNumber"),
-    FIRST_NAME("p.firstName", "firstName"),
-    LAST_NAME("p.lastName", "lastName"),
     CREATED_AT("p.createdAt", "createdAt"),
     UPDATED_AT("p.updatedAt", "updatedAt"),
     STATUS("s.statusCode", "status");
@@ -40,6 +39,6 @@ public enum UserSortColumn {
             }
         }
         throw new IllegalArgumentException("Invalid sort column: " + apiName + 
-            ". Allowed columns: username, email, phoneNumber, firstName, lastName, createdAt, updatedAt, status");
+            ". Allowed columns: username, fullName, email, phoneNumber, createdAt, updatedAt, status");
     }
 }

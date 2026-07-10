@@ -23,9 +23,9 @@ import org.hibernate.annotations.Immutable;
 @Entity
 @Immutable
 @Table(
-        name = "pp_usr_user_statuses",
+        name = "pp_r_user_status",
         uniqueConstraints = {
-                @UniqueConstraint(name = "uk_pp_usr_user_statuses_display_name", columnNames = "display_name")
+                @UniqueConstraint(name = "uk_pp_r_user_status_display_name", columnNames = "display_name")
         }
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

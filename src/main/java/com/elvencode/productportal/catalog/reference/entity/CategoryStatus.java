@@ -23,10 +23,10 @@ import org.hibernate.annotations.Immutable;
 @Entity
 @Immutable
 @Table(
-        name = "pp_r_category_statuses",
+        name = "pp_r_category_status",
         uniqueConstraints = {
                 @UniqueConstraint(
-                        name = "uk_pp_r_category_statuses_display_name",
+                        name = "uk_pp_r_category_status_display_name",
                         columnNames = "display_name")
         }
 )

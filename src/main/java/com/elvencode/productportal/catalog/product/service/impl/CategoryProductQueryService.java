@@ -24,10 +24,11 @@ public class CategoryProductQueryService implements ProductService {
 
     @Override
     public PageResponse<ProductSummaryResponse> getProductsByCategoryIdIncludingSubcategories(
-            Long categoryId, Pageable pageable) {
+            Long organizationId, Long categoryId, Pageable pageable) {
         List<Long> categorySubtreeIds = categoryHierarchyQueryService.getSelfAndDescendantCategoryIds(categoryId);
 
-        return PageResponse.from(productRepository.findByCategory_IdIn(categorySubtreeIds, pageable)
+        return PageResponse.from(productRepository
+                .findByOrganization_IdAndCategory_IdIn(organizationId, categorySubtreeIds, pageable)
                 .map(productMapper::toSummaryResponse));
     }
 }

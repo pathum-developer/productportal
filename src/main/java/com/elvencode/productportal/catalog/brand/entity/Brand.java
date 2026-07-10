@@ -30,13 +30,13 @@ import org.hibernate.annotations.NaturalId;
 @Setter
 @Entity
 @Table(
-        name = "pp_m_brands",
+        name = "pp_m_brand",
         uniqueConstraints = {
-                @UniqueConstraint(name = "uk_pp_m_brands_name", columnNames = "name"),
-                @UniqueConstraint(name = "uk_pp_m_brands_slug", columnNames = "slug")
+                @UniqueConstraint(name = "uk_pp_m_brand_name", columnNames = "name"),
+                @UniqueConstraint(name = "uk_pp_m_brand_slug", columnNames = "slug")
         },
         indexes = {
-                @Index(name = "idx_pp_m_brands_status", columnList = "status_code")
+                @Index(name = "idx_pp_m_brand_status", columnList = "status_code")
         }
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -76,7 +76,7 @@ public class Brand extends BaseEntity {
     @JoinColumn(
             name = "status_code",
             nullable = false,
-            foreignKey = @ForeignKey(name = "fk_pp_m_brands_status"))
+            foreignKey = @ForeignKey(name = "fk_pp_m_brand_status"))
     private BrandStatus status;
 
     @Version

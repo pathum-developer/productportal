@@ -21,9 +21,9 @@ import lombok.ToString;
 @Setter(AccessLevel.PROTECTED)
 @Entity
 @Table(
-        name = "pp_usm_roles",
+        name = "pp_m_role",
         uniqueConstraints = {
-                @UniqueConstraint(name = "uk_pp_usm_roles_display_name", columnNames = "display_name")
+                @UniqueConstraint(name = "uk_pp_m_role_display_name", columnNames = "display_name")
         }
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

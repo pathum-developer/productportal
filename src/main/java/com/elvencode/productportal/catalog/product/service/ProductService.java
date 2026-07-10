@@ -8,6 +8,8 @@ import org.springframework.data.domain.Pageable;
 public interface ProductService {
 
     PageResponse<ProductSummaryResponse> getProductsByCategoryIdIncludingSubcategories(
-            Long categoryId, Pageable pageable);
+            Long organizationId,
+            Long categoryId,
+            Pageable pageable);
 
 }

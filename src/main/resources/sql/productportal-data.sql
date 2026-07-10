@@ -1,13 +1,13 @@
-﻿-- Seed data is ordered by foreign-key dependencies. Run productportal-schema.sql before this file.
+-- Seed data is ordered by foreign-key dependencies. Run productportal-schema.sql before this file.
 
-INSERT IGNORE INTO pp_usm_roles
+INSERT IGNORE INTO pp_m_role
     (role_code, display_name, description, sort_order)
 VALUES
     ('BUYER', 'Buyer', 'Customer account that can browse and purchase products.', 1),
     ('SELLER', 'Seller', 'Merchant account that can manage seller-owned catalog data.', 2),
     ('ADMIN', 'Admin', 'Administrative account with elevated product portal privileges.', 3);
 
-INSERT IGNORE INTO pp_usm_permissions
+INSERT IGNORE INTO pp_m_permission
     (permission_code, display_name, description, resource_code, action_code, sort_order)
 VALUES
     ('PROFILE_READ', 'Read Profile', 'View own user profile details.', 'PROFILE', 'READ', 1),
@@ -35,7 +35,7 @@ VALUES
     ('PERMISSION_READ', 'Read Permissions', 'View permission definitions.', 'PERMISSION', 'READ', 23),
     ('PERMISSION_MANAGE', 'Manage Permissions', 'Create, update, and deactivate permissions.', 'PERMISSION', 'MANAGE', 24);
 
-INSERT IGNORE INTO pp_usm_permission_scopes
+INSERT IGNORE INTO pp_r_permission_scope
     (scope_code, display_name, description, sort_order)
 VALUES
     ('SELF', 'Self', 'Permission applies only to the current user account or profile.', 1),
@@ -43,7 +43,7 @@ VALUES
     ('ORGANIZATION', 'Organization', 'Permission applies to resources inside the selected organization.', 3),
     ('GLOBAL', 'Global', 'Permission applies across all organizations in the platform.', 4);
 
-INSERT IGNORE INTO pp_usm_role_permissions
+INSERT IGNORE INTO pp_t_role_permission_grant
     (role_code, permission_code, scope_code)
 VALUES
     ('BUYER', 'PROFILE_READ', 'SELF'),
@@ -85,7 +85,7 @@ VALUES
     ('ADMIN', 'PERMISSION_READ', 'ORGANIZATION'),
     ('ADMIN', 'PERMISSION_MANAGE', 'ORGANIZATION');
 
-INSERT IGNORE INTO pp_usr_user_statuses
+INSERT IGNORE INTO pp_r_user_status
     (status_code, display_name, description, sort_order)
 VALUES
     ('ACTIVE', 'Active', 'User can authenticate and use permitted product portal features.', 1),
@@ -93,7 +93,7 @@ VALUES
     ('SUSPENDED', 'Suspended', 'User account is temporarily blocked due to policy or risk.', 3),
     ('DELETED', 'Deleted', 'User account is logically removed and retained only for audit history.', 4);
 
-INSERT IGNORE INTO pp_org_membership_statuses
+INSERT IGNORE INTO pp_r_membership_status
     (status_code, display_name, description, sort_order)
 VALUES
     ('INVITED', 'Invited', 'User has been invited to the organization but has not joined yet.', 1),
@@ -102,7 +102,7 @@ VALUES
     ('LEFT', 'Left', 'User left the organization voluntarily.', 4),
     ('REMOVED', 'Removed', 'User was removed from the organization.', 5);
 
-INSERT INTO pp_org_organizations
+INSERT INTO pp_m_organization
     (organization_id, organization_code, display_name, legal_name, description, created_by)
 VALUES
     (1, 'DEFAULT', 'Default Organization', 'Product Portal',
@@ -113,26 +113,26 @@ ON DUPLICATE KEY UPDATE
     description = VALUES(description),
     updated_by = 'SYSTEM';
 
-INSERT IGNORE INTO pp_r_category_statuses
+INSERT IGNORE INTO pp_r_category_status
     (status_code, display_name, description, sort_order)
 VALUES
     ('ACTIVE', 'Active', 'Category is visible and available for product assignment.', 1),
     ('INACTIVE', 'Inactive', 'Category is retained but hidden from active catalog flows.', 2);
 
-INSERT IGNORE INTO pp_r_brand_statuses
+INSERT IGNORE INTO pp_r_brand_status
     (status_code, display_name, description, sort_order)
 VALUES
     ('ACTIVE', 'Active', 'Brand is visible and available for product assignment.', 1),
     ('INACTIVE', 'Inactive', 'Brand is retained but hidden from active catalog flows.', 2);
 
-INSERT IGNORE INTO pp_r_product_statuses
+INSERT IGNORE INTO pp_r_product_status
     (status_code, display_name, description, sort_order)
 VALUES
     ('DRAFT', 'Draft', 'Product is incomplete and not visible in active catalog flows.', 1),
     ('ACTIVE', 'Active', 'Product is visible and available in active catalog flows.', 2),
     ('INACTIVE', 'Inactive', 'Product is retained but hidden from active catalog flows.', 3);
 
-INSERT INTO pp_usm_users
+INSERT INTO pp_m_user
     (user_id, username, full_name, email, phone_number, password_hash, status, primary_organization_id, created_by)
 VALUES
     (5001, 'amal.perera', 'Amal Perera', 'amal.perera@example.com', '+94771110001',
@@ -159,7 +159,7 @@ ON DUPLICATE KEY UPDATE
     primary_organization_id = VALUES(primary_organization_id),
     updated_by = 'SYSTEM';
 
-INSERT INTO pp_org_user_memberships
+INSERT INTO pp_t_user_organization_membership
     (user_id, organization_id, membership_status, is_primary, joined_at, created_by)
 VALUES
     (5001, 1, 'ACTIVE', TRUE, CURRENT_TIMESTAMP(6), 'SYSTEM'),
@@ -176,7 +176,7 @@ ON DUPLICATE KEY UPDATE
     joined_at = VALUES(joined_at),
     updated_by = 'SYSTEM';
 
-INSERT IGNORE INTO pp_usm_user_roles
+INSERT IGNORE INTO pp_t_user_role_assignment
     (user_id, organization_id, role_code)
 VALUES
     (5001, 1, 'BUYER'),
@@ -188,7 +188,7 @@ VALUES
     (5007, 1, 'SELLER'),
     (5008, 1, 'BUYER');
 
-INSERT INTO pp_usm_addresses
+INSERT INTO pp_m_user_address
     (address_id, user_id, recipient_name, phone_number, address_line_1, address_line_2, city, district,
      province, postal_code, country, is_default, created_by)
 VALUES
@@ -223,7 +223,7 @@ ON DUPLICATE KEY UPDATE
     is_default = VALUES(is_default),
     updated_by = 'SYSTEM';
 
-INSERT INTO pp_m_categories
+INSERT INTO pp_m_category
     (category_id, parent_category_id, name, slug, status_code, sort_order, created_by)
 VALUES
     (1001, NULL, 'Electronics', 'electronics', 'ACTIVE', 1, 'SYSTEM'),
@@ -238,7 +238,7 @@ ON DUPLICATE KEY UPDATE
     sort_order = VALUES(sort_order),
     updated_by = 'SYSTEM';
 
-INSERT INTO pp_m_categories
+INSERT INTO pp_m_category
     (category_id, parent_category_id, name, slug, status_code, sort_order, created_by)
 VALUES
     (1006, 1001, 'Smartphones', 'smartphones', 'ACTIVE', 1, 'SYSTEM'),
@@ -258,7 +258,7 @@ ON DUPLICATE KEY UPDATE
     sort_order = VALUES(sort_order),
     updated_by = 'SYSTEM';
 
-INSERT INTO pp_m_brands
+INSERT INTO pp_m_brand
     (brand_id, name, slug, description, logo_url, status_code, created_by)
 VALUES
     (2001, 'Apple', 'apple', 'Consumer electronics and computing devices.', 'https://cdn.productportal.local/brands/apple.png', 'ACTIVE', 'SYSTEM'),
@@ -283,7 +283,7 @@ ON DUPLICATE KEY UPDATE
     status_code = VALUES(status_code),
     updated_by = 'SYSTEM';
 
-INSERT INTO pp_m_products
+INSERT INTO pp_m_product
     (product_id, organization_id, owner_user_id, category_id, brand_id, name, slug, description, model_number, sku_code, status_code, created_by)
 VALUES
     (3001, 1, 5003, 1006, 2001, 'iPhone 16 Pro 256GB', 'iphone-16-pro-256gb', 'Premium smartphone with 256GB storage.', 'A3293', 'SKU-IPH16P-256', 'ACTIVE', 'SYSTEM'),

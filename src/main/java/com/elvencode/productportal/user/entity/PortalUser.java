@@ -1,7 +1,10 @@
 package com.elvencode.productportal.user.entity;
 
+import com.elvencode.productportal.access.assignment.entity.UserRoleAssignment;
 import com.elvencode.productportal.access.role.entity.Role;
 import com.elvencode.productportal.common.persistence.BaseEntity;
+import com.elvencode.productportal.organization.entity.Organization;
+import com.elvencode.productportal.organization.membership.entity.UserOrganizationMembership;
 import com.elvencode.productportal.user.address.entity.Address;
 import com.elvencode.productportal.user.reference.entity.UserStatus;
 import jakarta.persistence.CascadeType;
@@ -33,23 +36,26 @@ import lombok.ToString;
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.NaturalId;
 
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
 @Entity
 @Table(
-        name = "pp_usm_users",
+        name = "pp_m_user",
         uniqueConstraints = {
-                @UniqueConstraint(name = "uk_pp_usm_users_username", columnNames = "username"),
-                @UniqueConstraint(name = "uk_pp_usm_users_email", columnNames = "email"),
-                @UniqueConstraint(name = "uk_pp_usm_users_phone_number", columnNames = "phone_number")
+                @UniqueConstraint(name = "uk_pp_m_user_username", columnNames = "username"),
+                @UniqueConstraint(name = "uk_pp_m_user_email", columnNames = "email"),
+                @UniqueConstraint(name = "uk_pp_m_user_phone_number", columnNames = "phone_number")
         },
         indexes = {
-                @Index(name = "idx_pp_usm_users_role_code", columnList = "role_code"),
-                @Index(name = "idx_pp_usm_users_status", columnList = "status"),
-                @Index(name = "idx_pp_usm_users_role_status", columnList = "role_code, status")
+                @Index(name = "idx_pp_m_user_status", columnList = "status"),
+                @Index(name = "idx_pp_m_user_primary_organization_id", columnList = "primary_organization_id")
         }
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -92,26 +98,32 @@ public class PortalUser extends BaseEntity {
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
-            name = "role_code",
-            nullable = false,
-            foreignKey = @ForeignKey(name = "fk_pp_usm_users_role"))
-    private Role role;
+            name = "primary_organization_id",
+            foreignKey = @ForeignKey(name = "fk_pp_m_user_primary_organization"))
+    private Organization primaryOrganization;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
             name = "status",
             nullable = false,
-            foreignKey = @ForeignKey(name = "fk_pp_usm_users_status"))
+            foreignKey = @ForeignKey(name = "fk_pp_m_user_status"))
     private UserStatus status;
 
     @OrderBy("defaultAddress DESC, id ASC")
     @OneToMany(mappedBy = "portalUser", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 5)
     private List<Address> addresses = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @BatchSize(size = 20)
+    private Set<UserOrganizationMembership> memberships = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @BatchSize(size = 20)
+    private Set<UserRoleAssignment> roleAssignments = new LinkedHashSet<>();
 
     @Version
     @Column(name = "version", nullable = false)
@@ -123,16 +135,44 @@ public class PortalUser extends BaseEntity {
             String email,
             String phoneNumber,
             String passwordHash,
-            Role role,
-            UserStatus status) {
+            UserStatus status,
+            Organization primaryOrganization) {
         PortalUser portalUser = new PortalUser();
         portalUser.username = username;
         portalUser.fullName = fullName;
         portalUser.email = email;
         portalUser.phoneNumber = phoneNumber;
         portalUser.passwordHash = passwordHash;
-        portalUser.role = role;
         portalUser.status = status;
+        portalUser.primaryOrganization = primaryOrganization;
         return portalUser;
+    }
+
+    public List<Role> getRoles() {
+        return getActiveRoleAssignments()
+                .stream()
+                .map(UserRoleAssignment::getRole)
+                .distinct()
+                .toList();
+    }
+
+    public List<UserRoleAssignment> getActiveRoleAssignments() {
+        Instant now = Instant.now();
+        return roleAssignments.stream()
+                .filter(assignment -> assignment.isCurrentlyActive(now))
+                .sorted(Comparator
+                        .comparing((UserRoleAssignment assignment) -> assignment.getRole().getSortOrder())
+                        .thenComparing(assignment -> assignment.getRole().getRoleCode()))
+                .toList();
+    }
+
+    public void addMembership(UserOrganizationMembership membership) {
+        memberships.add(membership);
+        membership.setUser(this);
+    }
+
+    public void addRoleAssignment(UserRoleAssignment roleAssignment) {
+        roleAssignments.add(roleAssignment);
+        roleAssignment.setUser(this);
     }
 }

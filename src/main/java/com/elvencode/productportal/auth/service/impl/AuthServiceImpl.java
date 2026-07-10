@@ -8,10 +8,9 @@ import com.elvencode.productportal.security.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.time.Instant;
 import java.util.Locale;
 
 @Service
@@ -23,25 +22,31 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public LoginResponse login(LoginRequest loginRequest) {
+
         var authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         normalizeUsername(loginRequest.username()),
                         loginRequest.password()));
 
-        String accessToken = jwtUtil.generateJwtToken(authentication);
+        Instant issuedAt = Instant.now();
+        Instant expiresAt = jwtUtil.calculateAccessTokenExpiresAt(issuedAt);
+        String accessToken = jwtUtil.generateJwtToken(authentication, issuedAt);
         ProductPortalUserPrincipal principal = (ProductPortalUserPrincipal) authentication.getPrincipal();
-
-        List<String> roles = authentication.getAuthorities()
-                .stream()
-                .map(GrantedAuthority::getAuthority)
-                .toList();
 
         return new LoginResponse(
                 "Bearer",
                 accessToken,
+                issuedAt,
+                expiresAt,
                 jwtUtil.getAccessTokenValiditySeconds(),
-                principal.username(),
-                roles);
+                new LoginResponse.AuthenticatedUserResponse(
+                        principal.userId(),
+                        principal.username(),
+                        principal.statusCode(),
+                        principal.primaryOrganizationId()),
+                new LoginResponse.AccessContextResponse(
+                        principal.roleCodes(),
+                        principal.permissionCodes()));
     }
 
     private String normalizeUsername(String username) {

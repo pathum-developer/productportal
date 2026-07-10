@@ -23,15 +23,15 @@ import java.util.List;
 @Setter
 @Entity
 @Table(
-        name = "pp_m_categories",
+        name = "pp_m_category",
         uniqueConstraints = {
-                @UniqueConstraint(name = "uk_pp_m_categories_slug", columnNames = "slug")
+                @UniqueConstraint(name = "uk_pp_m_category_slug", columnNames = "slug")
         },
         indexes = {
-                @Index(name = "idx_pp_m_categories_parent_id", columnList = "parent_category_id"),
-                @Index(name = "idx_pp_m_categories_status", columnList = "status_code"),
+                @Index(name = "idx_pp_m_category_parent_id", columnList = "parent_category_id"),
+                @Index(name = "idx_pp_m_category_status", columnList = "status_code"),
                 @Index(
-                        name = "idx_pp_m_categories_parent_status",
+                        name = "idx_pp_m_category_parent_status",
                         columnList = "parent_category_id, status_code")
         }
 )
@@ -50,7 +50,7 @@ public class Category extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "parent_category_id",
-            foreignKey = @ForeignKey(name = "fk_pp_m_categories_parent"))
+            foreignKey = @ForeignKey(name = "fk_pp_m_category_parent"))
     private Category parentCategory;
 
     @NotBlank
@@ -71,7 +71,7 @@ public class Category extends BaseEntity {
     @JoinColumn(
             name = "status_code",
             nullable = false,
-            foreignKey = @ForeignKey(name = "fk_pp_m_categories_status"))
+            foreignKey = @ForeignKey(name = "fk_pp_m_category_status"))
     private CategoryStatus status;
 
     @NotNull

@@ -28,12 +28,12 @@ import lombok.ToString;
 @Setter
 @Entity
 @Table(
-        name = "pp_usm_addresses",
+        name = "pp_m_user_address",
         indexes = {
-                @Index(name = "idx_pp_usm_addresses_user_id", columnList = "user_id"),
-                @Index(name = "idx_pp_usm_addresses_user_default", columnList = "user_id, is_default"),
-                @Index(name = "idx_pp_usm_addresses_city", columnList = "city"),
-                @Index(name = "idx_pp_usm_addresses_postal_code", columnList = "postal_code")
+                @Index(name = "idx_pp_m_user_address_user_id", columnList = "user_id"),
+                @Index(name = "idx_pp_m_user_address_user_default", columnList = "user_id, is_default"),
+                @Index(name = "idx_pp_m_user_address_city", columnList = "city"),
+                @Index(name = "idx_pp_m_user_address_postal_code", columnList = "postal_code")
         }
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -53,7 +53,7 @@ public class Address extends BaseEntity {
     @JoinColumn(
             name = "user_id",
             nullable = false,
-            foreignKey = @ForeignKey(name = "fk_pp_usm_addresses_user"))
+            foreignKey = @ForeignKey(name = "fk_pp_m_user_address_user"))
     private PortalUser portalUser;
 
     @NotBlank

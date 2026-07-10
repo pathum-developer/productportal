@@ -41,7 +41,7 @@ public class UserController {
 
     @Operation(
             summary = "Register user",
-            description = "Creates a buyer user account with ACTIVE status. Role assignment is controlled by the server."
+            description = "Creates an ACTIVE user account with a primary organization membership and default role assignment."
     )
     @ApiResponses({
             @ApiResponse(
@@ -66,7 +66,7 @@ public class UserController {
         UserRegistrationResponse response = userService.registerUser(request);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentContextPath()
-                .path("/api/user/username/{username}")
+                .path("/api/users/username/{username}")
                 .buildAndExpand(response.username())
                 .toUri();
 
@@ -75,7 +75,7 @@ public class UserController {
 
     @Operation(
             summary = "Get user details by username",
-            description = "Returns user account details with role, status, audit metadata, and all addresses."
+            description = "Returns user account details with organization memberships, role assignments, status, audit metadata, and all addresses."
     )
     @ApiResponses({
             @ApiResponse(
@@ -109,13 +109,13 @@ public class UserController {
             description = """
                     Retrieve paginated users filtered by status code with flexible sorting.
                     
-                    **Sortable Columns:** username, email, phoneNumber, firstName, lastName, createdAt, updatedAt, status
+                    **Sortable Columns:** username, fullName, email, phoneNumber, createdAt, updatedAt, status
                     
                     **Sort Examples:**
                     - `?sort=username,desc` (default) - Sort by username descending
                     - `?sort=email,asc` - Sort by email ascending
                     - `?sort=createdAt,desc` - Sort by created date descending
-                    - `?sort=firstName,asc&sort=lastName,asc` - Multi-column sort (first name, then last name)
+                    - `?sort=fullName,asc` - Sort by full name ascending
                     
                     **Invalid columns are ignored; defaults to username DESC.**
                     All sort parameters are validated server-side to prevent SQL injection.
@@ -140,7 +140,7 @@ public class UserController {
             @NotBlank(message = "Status is required")
             String status,
             @Parameter(description = "Pagination & sort params. Default: page=0, size=20, sort=username,desc. " +
-                    "Sortable columns: username, email, phoneNumber, firstName, lastName, createdAt, updatedAt, status. " +
+                    "Sortable columns: username, fullName, email, phoneNumber, createdAt, updatedAt, status. " +
                     "Example: ?page=0&size=10&sort=email,asc")
             Pageable pageable) {
         return ResponseEntity.ok().body(userService.getAllUsersByStatus(status, pageable));

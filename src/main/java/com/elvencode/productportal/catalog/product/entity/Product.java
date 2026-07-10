@@ -4,6 +4,8 @@ import com.elvencode.productportal.catalog.brand.entity.Brand;
 import com.elvencode.productportal.catalog.category.entity.Category;
 import com.elvencode.productportal.catalog.reference.entity.ProductStatus;
 import com.elvencode.productportal.common.persistence.BaseEntity;
+import com.elvencode.productportal.organization.entity.Organization;
+import com.elvencode.productportal.user.entity.PortalUser;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -26,26 +28,36 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.NaturalId;
 
 @Getter
 @Setter
 @Entity
 @Table(
-        name = "pp_m_products",
+        name = "pp_m_product",
         uniqueConstraints = {
-                @UniqueConstraint(name = "uk_pp_m_products_slug", columnNames = "slug"),
-                @UniqueConstraint(name = "uk_pp_m_products_sku_code", columnNames = "sku_code")
+                @UniqueConstraint(name = "uk_pp_m_product_org_slug", columnNames = {"organization_id", "slug"}),
+                @UniqueConstraint(name = "uk_pp_m_product_org_sku_code", columnNames = {"organization_id", "sku_code"})
         },
         indexes = {
-                @Index(name = "idx_pp_m_products_category_id", columnList = "category_id"),
-                @Index(name = "idx_pp_m_products_brand_id", columnList = "brand_id"),
-                @Index(name = "idx_pp_m_products_status", columnList = "status_code"),
+                @Index(name = "idx_pp_m_product_organization_id", columnList = "organization_id"),
+                @Index(name = "idx_pp_m_product_owner_user_id", columnList = "owner_user_id"),
                 @Index(
-                        name = "idx_pp_m_products_category_status",
+                        name = "idx_pp_m_product_org_owner_status",
+                        columnList = "organization_id, owner_user_id, status_code"),
+                @Index(name = "idx_pp_m_product_category_id", columnList = "category_id"),
+                @Index(name = "idx_pp_m_product_brand_id", columnList = "brand_id"),
+                @Index(name = "idx_pp_m_product_status", columnList = "status_code"),
+                @Index(
+                        name = "idx_pp_m_product_org_status",
+                        columnList = "organization_id, status_code"),
+                @Index(
+                        name = "idx_pp_m_product_org_category_status",
+                        columnList = "organization_id, category_id, status_code"),
+                @Index(
+                        name = "idx_pp_m_product_category_status",
                         columnList = "category_id, status_code"),
                 @Index(
-                        name = "idx_pp_m_products_brand_status",
+                        name = "idx_pp_m_product_brand_status",
                         columnList = "brand_id, status_code")
         }
 )
@@ -64,15 +76,29 @@ public class Product extends BaseEntity {
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
+            name = "organization_id",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_pp_m_product_organization"))
+    private Organization organization;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "owner_user_id",
+            foreignKey = @ForeignKey(name = "fk_pp_m_product_owner_user"))
+    private PortalUser owner;
+
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(
             name = "category_id",
             nullable = false,
-            foreignKey = @ForeignKey(name = "fk_pp_m_products_category"))
+            foreignKey = @ForeignKey(name = "fk_pp_m_product_category"))
     private Category category;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "brand_id",
-            foreignKey = @ForeignKey(name = "fk_pp_m_products_brand"))
+            foreignKey = @ForeignKey(name = "fk_pp_m_product_brand"))
     private Brand brand;
 
     @NotBlank
@@ -81,7 +107,6 @@ public class Product extends BaseEntity {
     @ToString.Include
     private String name;
 
-    @NaturalId(mutable = true)
     @NotBlank
     @Size(max = 300)
     @Column(name = "slug", nullable = false, length = 300)
@@ -104,7 +129,7 @@ public class Product extends BaseEntity {
     @JoinColumn(
             name = "status_code",
             nullable = false,
-            foreignKey = @ForeignKey(name = "fk_pp_m_products_status"))
+            foreignKey = @ForeignKey(name = "fk_pp_m_product_status"))
     private ProductStatus status;
 
     @Version

@@ -114,7 +114,7 @@ Users need flexibility to sort by different columns for better UX
 Tested in Postman:
 - ?sort=username,desc
 - ?sort=email,asc
-- ?sort=firstName,asc&sort=lastName,asc
+- ?sort=fullName,asc
 
 Closes #42
 ```

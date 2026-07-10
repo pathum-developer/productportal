@@ -8,7 +8,7 @@ Product Portal is a comprehensive backend solution for managing users, products,
 
 - **Two-Query Pagination Pattern** — Scalable, N+1 query-safe pagination with fetch-joins
 - **Custom Multi-Column Sorting** — SQL injection-safe sort parameter validation
-- **Enterprise Security** — JWT authentication, role-based access control (RBAC)
+- **Enterprise Security** — JWT authentication, multi-role RBAC, scoped permissions, and organization-aware access
 - **AOP Logging & Performance Monitoring** — Execution time tracking via AspectJ
 - **Hierarchical Category Management** — Recursive CTEs with native SQL queries
 - **Comprehensive API Documentation** — OpenAPI 3.0 (Swagger) integration
@@ -58,8 +58,11 @@ com.elvencode.productportal
 │   ├── entity                    # Domain models
 │   ├── dto                       # Request/Response DTOs
 │   └── util                      # Sort validation, utilities
-├── access                        # Role & permission management
-│   └── role                      # Role entities & repository
+├── access                        # Role, permission, and assignment management
+│   ├── role                      # Role entities & repository
+│   ├── permission                # Permission grants and scopes
+│   └── assignment                # User role assignments
+├── organization                  # Organizations and memberships
 ├── catalog                       # Product & category management
 │   ├── product                   # Product entities & queries
 │   └── category                  # Hierarchical categories (recursive CTEs)
@@ -96,15 +99,15 @@ com.elvencode.productportal
 ## ✨ Features
 
 ### User Management
-- ✅ User registration with role assignment (default: BUYER)
-- ✅ Get user details by username with all associations (role, status, addresses)
+- ✅ User registration with primary organization membership and default role assignment
+- ✅ Get user details by username with memberships, roles, status, and addresses
 - ✅ **Paginated user listing by status** with custom sorting
 - ✅ Password hashing (BCrypt)
 - ✅ Unique constraint validation (username, email, phone)
 
 ### Authentication & Authorization
 - ✅ JWT token-based authentication
-- ✅ Role-based access control (RBAC)
+- ✅ Multi-role RBAC with permission authorities
 - ✅ Spring Security integration
 - ✅ Token refresh mechanism
 
@@ -195,10 +198,9 @@ Content-Type: application/json
 
 {
   "username": "amal.perera",
+  "fullName": "Amal Perera",
   "email": "amal@example.com",
   "phoneNumber": "+94771234567",
-  "firstName": "Amal",
-  "lastName": "Perera",
   "password": "SecurePassword123!"
 }
 ```
@@ -218,15 +220,14 @@ GET /users/status/{status}?page=0&size=20&sort=username,desc
 # Examples
 GET /users/status/ACTIVE?page=0&size=10
 GET /users/status/ACTIVE?page=0&size=10&sort=email,asc
-GET /users/status/ACTIVE?page=0&size=10&sort=createdAt,desc&sort=lastName,asc
+GET /users/status/ACTIVE?page=0&size=10&sort=createdAt,desc&sort=fullName,asc
 ```
 
 **Sortable Columns:**
 - `username` — User's login name
+- `fullName` — User's display name
 - `email` — Email address
 - `phoneNumber` — Phone number
-- `firstName` — First name
-- `lastName` — Last name
 - `createdAt` — Account creation date
 - `updatedAt` — Last update date
 - `status` — Account status code
@@ -242,26 +243,50 @@ GET /users/status/ACTIVE?page=0&size=10&sort=createdAt,desc&sort=lastName,asc
 
 ### Key Tables
 
-**pp_usm_users** — User accounts
+**pp_m_user** — User accounts
 - `user_id` (PK)
 - `username` (UNIQUE)
 - `email` (UNIQUE)
 - `phone_number` (UNIQUE)
-- `password` (hashed)
-- `first_name`, `last_name`
-- `role_code` (FK → pp_usm_roles)
-- `status` (FK → pp_usr_user_statuses)
+- `password_hash` (hashed)
+- `full_name`
+- `primary_organization_id` (FK → pp_m_organization)
+- `status` (FK → pp_r_user_status)
 - `created_at`, `updated_at`
 
-**pp_usm_roles** — User roles
+**pp_m_role** — Role definitions
 - `role_code` (PK)
-- `role_name`
+- `display_name`
 
-**pp_usr_user_statuses** — User statuses (ACTIVE, INACTIVE, SUSPENDED)
+**pp_m_permission** — Permission definitions
+- `permission_code` (PK)
+- `resource_code`, `action_code`
+
+**pp_m_organization** — Organizations
+- `organization_id` (PK)
+- `organization_code` (UNIQUE)
+- `display_name`
+
+**pp_t_user_organization_membership** — User organization memberships
+- `user_id`, `organization_id` (composite PK)
+- `membership_status`
+- `is_primary`
+
+**pp_t_user_role_assignment** — Role assignments
+- `user_id`, `organization_id`, `role_code` (composite PK)
+- `is_active`, `valid_from`, `valid_until`
+- `assigned_by`, `assigned_reason`, `revoked_by`, `revoked_reason`
+
+**pp_t_role_permission_grant** — Role permission grants
+- `role_code`, `permission_code` (composite PK)
+- `scope_code`
+- `is_active`
+
+**pp_r_user_status** — User statuses (ACTIVE, INACTIVE, SUSPENDED, DELETED)
 - `status_code` (PK)
 - `is_active` (flag for logical soft-delete)
 
-**pp_usm_addresses** — User addresses (1:M)
+**pp_m_user_address** — User addresses (1:M)
 - `address_id` (PK)
 - `user_id` (FK)
 - `address_line_1`, `address_line_2`

@@ -15,7 +15,7 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     Optional<Category> findWithParentCategoryAndStatusById(Long id);
 
     /*
-     * Uses the current adjacency-list model in pp_m_categories.
+     * Uses the current adjacency-list model in pp_m_category.
      * The result includes the requested category itself plus all descendants.
      * The path guard prevents repeated traversal if invalid cyclic hierarchy data exists.
      */
@@ -24,7 +24,7 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
                 SELECT
                     category_id,
                     CAST(category_id AS CHAR(4000)) AS path
-                FROM pp_m_categories
+                FROM pp_m_category
                 WHERE category_id = :categoryId
 
                 UNION ALL
@@ -32,7 +32,7 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
                 SELECT
                     category.category_id,
                     CONCAT(tree.path, ',', category.category_id)
-                FROM pp_m_categories category
+                FROM pp_m_category category
                 INNER JOIN category_tree tree
                     ON category.parent_category_id = tree.category_id
                 WHERE FIND_IN_SET(category.category_id, tree.path) = 0

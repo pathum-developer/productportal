@@ -14,7 +14,6 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Date;
-import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -25,12 +24,15 @@ public class JwtUtil {
     private final Environment env;
 
     public String generateJwtToken(Authentication authentication) {
+        return generateJwtToken(authentication, Instant.now());
+    }
+
+    public String generateJwtToken(Authentication authentication, Instant issuedAt) {
         String secret = env.getProperty(ApplicationConstants.JWT_SECRET_KEY,
                 ApplicationConstants.JWT_SECRET_DEFAULT_VALUE);
         SecretKey secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         ProductPortalUserPrincipal principal = (ProductPortalUserPrincipal) authentication.getPrincipal();
-        Instant issuedAt = Instant.now();
-        Instant expiresAt = issuedAt.plusSeconds(ACCESS_TOKEN_VALIDITY_SECONDS);
+        Instant expiresAt = calculateAccessTokenExpiresAt(issuedAt);
 
         return Jwts.builder()
                 .issuer("Product Portal")
@@ -39,11 +41,13 @@ public class JwtUtil {
                 .claim("username", principal.username())
                 .claim("email", principal.email())
                 .claim("phoneNumber", principal.phoneNumber())
-                .claim("role", principal.roleCode())
+                .claim("primaryOrganizationId", principal.primaryOrganizationId())
+                .claim("roleCodes", principal.roleCodes())
+                .claim("permissionCodes", principal.permissionCodes())
                 .claim("status", principal.statusCode())
-                .claim("roles", authentication.getAuthorities()
+                .claim("authorities", authentication.getAuthorities()
                         .stream().map(GrantedAuthority::getAuthority)
-                        .collect(Collectors.joining(",")))
+                        .toList())
                 .issuedAt(Date.from(issuedAt))
                 .expiration(Date.from(expiresAt))
                 .signWith(secretKey).compact();
@@ -51,5 +55,9 @@ public class JwtUtil {
 
     public long getAccessTokenValiditySeconds() {
         return ACCESS_TOKEN_VALIDITY_SECONDS;
+    }
+
+    public Instant calculateAccessTokenExpiresAt(Instant issuedAt) {
+        return issuedAt.plusSeconds(ACCESS_TOKEN_VALIDITY_SECONDS);
     }
 }

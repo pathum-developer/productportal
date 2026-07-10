@@ -16,15 +16,17 @@ import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.AntPathMatcher;
+import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Objects;
 
 @RequiredArgsConstructor
 public class JwtTokenValidatorFilter extends OncePerRequestFilter {
@@ -56,9 +58,9 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
                                 .verifyWith(secretKey)
                                 .build().parseSignedClaims(jwt).getPayload();
                         ProductPortalUserPrincipal principal = toPrincipal(claims);
-                        String roles = claims.get("roles", String.class);
+                        List<SimpleGrantedAuthority> authorities = toAuthorities(claims);
                         Authentication authentication = new UsernamePasswordAuthenticationToken(principal,
-                                null, AuthorityUtils.commaSeparatedStringToAuthorityList(roles));
+                                null, authorities);
                         SecurityContextHolder.getContext().setAuthentication(authentication);
                     }
                 }
@@ -84,13 +86,38 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
 
     private ProductPortalUserPrincipal toPrincipal(Claims claims) {
         Number userId = claims.get("userId", Number.class);
+        Number primaryOrganizationId = claims.get("primaryOrganizationId", Number.class);
+        List<String> roleCodes = readStringListClaim(claims, "roleCodes");
 
         return new ProductPortalUserPrincipal(
                 userId.longValue(),
                 claims.get("username", String.class),
                 claims.get("email", String.class),
                 claims.get("phoneNumber", String.class),
-                claims.get("role", String.class),
+                primaryOrganizationId == null ? null : primaryOrganizationId.longValue(),
+                roleCodes,
+                readStringListClaim(claims, "permissionCodes"),
                 claims.get("status", String.class));
+    }
+
+    private List<SimpleGrantedAuthority> toAuthorities(Claims claims) {
+        List<String> authorityNames = readStringListClaim(claims, "authorities");
+
+        return authorityNames.stream()
+                .filter(StringUtils::hasText)
+                .map(SimpleGrantedAuthority::new)
+                .toList();
+    }
+
+    private List<String> readStringListClaim(Claims claims, String claimName) {
+        Object value = claims.get(claimName);
+        if (value instanceof List<?> values) {
+            return values.stream()
+                    .filter(Objects::nonNull)
+                    .map(Object::toString)
+                    .filter(StringUtils::hasText)
+                    .toList();
+        }
+        return List.of();
     }
 }

@@ -10,9 +10,9 @@ import java.util.Collection;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
-    @EntityGraph(attributePaths = {"category", "brand", "status"})
-    Page<Product> findByCategory_Id(Long categoryId, Pageable pageable);
-
-    @EntityGraph(attributePaths = {"category", "brand", "status"})
-    Page<Product> findByCategory_IdIn(Collection<Long> categoryIds, Pageable pageable);
+    @EntityGraph(attributePaths = {"organization", "owner", "category", "brand", "status"})
+    Page<Product> findByOrganization_IdAndCategory_IdIn(
+            Long organizationId,
+            Collection<Long> categoryIds,
+            Pageable pageable);
 }
