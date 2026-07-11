@@ -8,6 +8,14 @@ public record ErrorResponseDto(
         String apiPath,
         HttpStatus errorCode,
         String errorMessage,
-        LocalDateTime errorTime
+        LocalDateTime errorTime,
+        String correlationId
 ) {
+    public ErrorResponseDto(
+            String apiPath,
+            HttpStatus errorCode,
+            String errorMessage,
+            LocalDateTime errorTime) {
+        this(apiPath, errorCode, errorMessage, errorTime, null);
+    }
 }
