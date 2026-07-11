@@ -16,6 +16,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class JwtUtil {
 
+    public static final String SESSION_ID_CLAIM = "sessionId";
+
     private final JwtProperties jwtProperties;
 
     public String generateJwtToken(Authentication authentication) {
@@ -23,18 +25,27 @@ public class JwtUtil {
     }
 
     public String generateJwtToken(Authentication authentication, Instant issuedAt) {
+        return generateJwtToken(authentication, null, issuedAt);
+    }
+
+    public String generateJwtToken(Authentication authentication, UUID sessionId, Instant issuedAt) {
         SecretKey secretKey = jwtProperties.signingKey();
         ProductPortalUserPrincipal principal = (ProductPortalUserPrincipal) authentication.getPrincipal();
         Instant expiresAt = calculateAccessTokenExpiresAt(issuedAt);
 
-        return Jwts.builder()
+        var builder = Jwts.builder()
                 .issuer(jwtProperties.issuer())
                 .id(UUID.randomUUID().toString())
                 .subject(String.valueOf(principal.userId()))
                 .claim("userId", principal.userId())
                 .issuedAt(Date.from(issuedAt))
-                .expiration(Date.from(expiresAt))
-                .signWith(secretKey).compact();
+                .expiration(Date.from(expiresAt));
+
+        if (sessionId != null) {
+            builder.claim(SESSION_ID_CLAIM, sessionId.toString());
+        }
+
+        return builder.signWith(secretKey).compact();
     }
 
     public long getAccessTokenValiditySeconds() {

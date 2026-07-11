@@ -1,6 +1,7 @@
 package com.elvencode.productportal.auth.controller;
 
 import com.elvencode.productportal.auth.dto.request.LoginRequest;
+import com.elvencode.productportal.auth.session.service.AuthSessionService;
 import com.elvencode.productportal.catalog.category.controller.CategoryController;
 import com.elvencode.productportal.catalog.product.controller.CategoryProductController;
 import com.elvencode.productportal.common.config.web.WebConfig;
@@ -107,7 +108,8 @@ class AuthEndpointSecurityPathAlignmentTest {
             super(
                     publicPaths,
                     new JwtProperties(TEST_JWT_SECRET, Duration.ofMinutes(15), "Product Portal"),
-                    mock(CurrentUserAccessService.class));
+                    mock(CurrentUserAccessService.class),
+                    mock(AuthSessionService.class));
         }
 
         private boolean shouldSkip(String requestUri) {

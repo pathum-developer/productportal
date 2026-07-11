@@ -10,25 +10,28 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class JwtUtilTest {
 
     private static final String STRONG_SECRET = "a".repeat(64);
+    private static final UUID SESSION_ID = UUID.fromString("9db45bc0-3625-47e5-a794-784f37f62734");
 
     @Test
-    void shouldCreateShortLivedTokenWithIdentityClaimsOnly() {
+    void shouldCreateShortLivedTokenWithIdentityAndSessionClaimsOnly() {
         JwtProperties jwtProperties = new JwtProperties(
                 STRONG_SECRET,
                 Duration.ofMinutes(10),
                 "Product Portal Test");
         JwtUtil jwtUtil = new JwtUtil(jwtProperties);
-        Instant issuedAt = Instant.parse("2026-07-11T10:00:00Z");
+        Instant issuedAt = Instant.now().truncatedTo(ChronoUnit.SECONDS);
 
-        String token = jwtUtil.generateJwtToken(authentication(), issuedAt);
+        String token = jwtUtil.generateJwtToken(authentication(), SESSION_ID, issuedAt);
 
         Claims claims = Jwts.parser()
                 .requireIssuer("Product Portal Test")
@@ -39,6 +42,7 @@ class JwtUtilTest {
 
         assertThat(claims.getSubject()).isEqualTo("42");
         assertThat(claims.get("userId", Number.class).longValue()).isEqualTo(42L);
+        assertThat(claims.get(JwtUtil.SESSION_ID_CLAIM, String.class)).isEqualTo(SESSION_ID.toString());
         assertThat(claims.getIssuedAt()).isEqualTo(Date.from(issuedAt));
         assertThat(claims.getExpiration()).isEqualTo(Date.from(issuedAt.plus(Duration.ofMinutes(10))));
         assertThat(claims.getId()).isNotBlank();

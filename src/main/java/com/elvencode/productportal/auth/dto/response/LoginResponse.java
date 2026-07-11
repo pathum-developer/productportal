@@ -2,13 +2,17 @@ package com.elvencode.productportal.auth.dto.response;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 public record LoginResponse(
         String tokenType,
         String accessToken,
+        String refreshToken,
+        UUID sessionId,
         Instant issuedAt,
         Instant expiresAt,
         Long expiresInSeconds,
+        Instant refreshExpiresAt,
         AuthenticatedUserResponse user,
         AccessContextResponse access
 ) {

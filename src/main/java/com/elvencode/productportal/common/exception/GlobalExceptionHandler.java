@@ -2,6 +2,7 @@ package com.elvencode.productportal.common.exception;
 
 
 import com.elvencode.productportal.auth.protection.exception.LoginBlockedException;
+import com.elvencode.productportal.auth.session.exception.InvalidRefreshTokenException;
 import com.elvencode.productportal.common.dto.ErrorResponseDto;
 import com.elvencode.productportal.common.web.CorrelationIdContext;
 import lombok.extern.slf4j.Slf4j;
@@ -58,6 +59,12 @@ public class GlobalExceptionHandler {
                 .header(HttpHeaders.RETRY_AFTER, String.valueOf(exception.retryAfterSeconds(now)))
                 .header(CorrelationIdContext.HEADER_NAME, correlationId)
                 .body(errorResponseDto);
+    }
+
+    @ExceptionHandler(InvalidRefreshTokenException.class)
+    public ResponseEntity<ErrorResponseDto> handleInvalidRefreshTokenException(
+            InvalidRefreshTokenException exception, WebRequest webRequest) {
+        return buildErrorResponse(webRequest, HttpStatus.UNAUTHORIZED, "Invalid refresh token");
     }
 
     @ExceptionHandler(AuthenticationException.class)

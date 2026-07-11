@@ -13,6 +13,8 @@ public class PathsConfig {
         return List.of(
                // "/api/publica/**",
                 "/api/auth/login",
+                "/api/auth/refresh",
+                "/api/auth/logout",
                 "/api/users/register",
                 "/api/contacts/public",
                 "/api/logging/public",

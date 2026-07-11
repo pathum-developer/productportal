@@ -1,9 +1,11 @@
 package com.elvencode.productportal.security.filter;
 
 import com.elvencode.productportal.common.constants.ApplicationConstants;
+import com.elvencode.productportal.auth.session.service.AuthSessionService;
 import com.elvencode.productportal.security.authentication.ProductPortalAuthenticationContext;
 import com.elvencode.productportal.security.config.JwtProperties;
 import com.elvencode.productportal.security.service.CurrentUserAccessService;
+import com.elvencode.productportal.security.util.JwtUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -23,6 +25,7 @@ import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 public class JwtTokenValidatorFilter extends OncePerRequestFilter {
@@ -34,6 +37,7 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
 
     private final JwtProperties jwtProperties;
     private final CurrentUserAccessService currentUserAccessService;
+    private final AuthSessionService authSessionService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -47,8 +51,10 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
                         .requireIssuer(jwtProperties.issuer())
                         .verifyWith(secretKey)
                         .build().parseSignedClaims(bearerToken.get()).getPayload();
+                Long userId = readUserId(claims);
+                authSessionService.validateAccessTokenSession(readSessionId(claims), userId);
                 ProductPortalAuthenticationContext authenticationContext =
-                        currentUserAccessService.loadContextByUserId(readUserId(claims));
+                        currentUserAccessService.loadContextByUserId(userId);
                 SecurityContextHolder.getContext().setAuthentication(authenticationContext.toAuthentication());
             }
         } catch (ExpiredJwtException exception) {
@@ -99,6 +105,19 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
             return Long.valueOf(claims.getSubject());
         } catch (NumberFormatException | NullPointerException exception) {
             throw new BadCredentialsException("Token subject is not a valid user id", exception);
+        }
+    }
+
+    private UUID readSessionId(Claims claims) {
+        String sessionId = claims.get(JwtUtil.SESSION_ID_CLAIM, String.class);
+        if (!StringUtils.hasText(sessionId)) {
+            throw new BadCredentialsException("Token session id is missing");
+        }
+
+        try {
+            return UUID.fromString(sessionId);
+        } catch (IllegalArgumentException exception) {
+            throw new BadCredentialsException("Token session id is not valid", exception);
         }
     }
 }

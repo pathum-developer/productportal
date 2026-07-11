@@ -98,6 +98,10 @@ public class PortalUser extends BaseEntity {
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
+    @NotNull
+    @Column(name = "credentials_changed_at", nullable = false)
+    private Instant credentialsChangedAt;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "primary_organization_id",
@@ -143,6 +147,7 @@ public class PortalUser extends BaseEntity {
         portalUser.email = email;
         portalUser.phoneNumber = phoneNumber;
         portalUser.passwordHash = passwordHash;
+        portalUser.credentialsChangedAt = Instant.now();
         portalUser.status = status;
         portalUser.primaryOrganization = primaryOrganization;
         return portalUser;
@@ -174,5 +179,14 @@ public class PortalUser extends BaseEntity {
     public void addRoleAssignment(UserRoleAssignment roleAssignment) {
         roleAssignments.add(roleAssignment);
         roleAssignment.setUser(this);
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        changePasswordHash(passwordHash, Instant.now());
+    }
+
+    public void changePasswordHash(String passwordHash, Instant changedAt) {
+        this.passwordHash = passwordHash;
+        this.credentialsChangedAt = changedAt;
     }
 }

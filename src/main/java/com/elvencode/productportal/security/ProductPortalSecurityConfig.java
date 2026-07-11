@@ -1,6 +1,8 @@
 package com.elvencode.productportal.security;
 
 import com.elvencode.productportal.auth.config.AuthenticationProtectionProperties;
+import com.elvencode.productportal.auth.session.config.AuthenticationSessionProperties;
+import com.elvencode.productportal.auth.session.service.AuthSessionService;
 import com.elvencode.productportal.security.config.JwtProperties;
 import com.elvencode.productportal.security.filter.JwtTokenValidatorFilter;
 import com.elvencode.productportal.security.service.CurrentUserAccessService;
@@ -29,7 +31,11 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-@EnableConfigurationProperties({JwtProperties.class, AuthenticationProtectionProperties.class})
+@EnableConfigurationProperties({
+        JwtProperties.class,
+        AuthenticationProtectionProperties.class,
+        AuthenticationSessionProperties.class
+})
 @RequiredArgsConstructor
 public class ProductPortalSecurityConfig {
 
@@ -41,6 +47,7 @@ public class ProductPortalSecurityConfig {
 
     private final JwtProperties jwtProperties;
     private final CurrentUserAccessService currentUserAccessService;
+    private final AuthSessionService authSessionService;
 
     @Bean
     SecurityFilterChain customSecurityFilterChain(HttpSecurity http) {
@@ -54,7 +61,11 @@ public class ProductPortalSecurityConfig {
                         requests.anyRequest().denyAll();
                     })
                 .addFilterBefore(
-                        new JwtTokenValidatorFilter(publicPaths, jwtProperties, currentUserAccessService),
+                        new JwtTokenValidatorFilter(
+                                publicPaths,
+                                jwtProperties,
+                                currentUserAccessService,
+                                authSessionService),
                         UsernamePasswordAuthenticationFilter.class)
                 .formLogin(flc -> flc.disable())
                 .httpBasic(httpBasic -> httpBasic.disable())
