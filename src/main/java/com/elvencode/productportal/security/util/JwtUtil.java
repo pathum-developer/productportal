@@ -2,12 +2,14 @@ package com.elvencode.productportal.security.util;
 
 import com.elvencode.productportal.security.config.JwtProperties;
 import com.elvencode.productportal.security.principal.ProductPortalUserPrincipal;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.time.Clock;
 import java.time.Instant;
 import java.util.Date;
 import java.util.UUID;
@@ -19,9 +21,10 @@ public class JwtUtil {
     public static final String SESSION_ID_CLAIM = "sessionId";
 
     private final JwtProperties jwtProperties;
+    private final Clock clock;
 
     public String generateJwtToken(Authentication authentication) {
-        return generateJwtToken(authentication, Instant.now());
+        return generateJwtToken(authentication, clock.instant());
     }
 
     public String generateJwtToken(Authentication authentication, Instant issuedAt) {
@@ -48,11 +51,25 @@ public class JwtUtil {
         return builder.signWith(secretKey).compact();
     }
 
+    public Claims parseSignedClaims(String token) {
+        return Jwts.parser()
+                .requireIssuer(jwtProperties.issuer())
+                .verifyWith(jwtProperties.signingKey())
+                .clock(jwtParserClock())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+    }
+
     public long getAccessTokenValiditySeconds() {
         return jwtProperties.accessTokenTtl().toSeconds();
     }
 
     public Instant calculateAccessTokenExpiresAt(Instant issuedAt) {
         return issuedAt.plus(jwtProperties.accessTokenTtl());
+    }
+
+    private io.jsonwebtoken.Clock jwtParserClock() {
+        return () -> Date.from(clock.instant());
     }
 }

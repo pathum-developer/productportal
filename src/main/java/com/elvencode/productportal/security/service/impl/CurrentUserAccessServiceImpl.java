@@ -16,6 +16,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
@@ -32,6 +33,7 @@ public class CurrentUserAccessServiceImpl implements CurrentUserAccessService {
     private final UserRepository userRepository;
     private final UserRoleAssignmentRepository userRoleAssignmentRepository;
     private final RolePermissionGrantRepository rolePermissionGrantRepository;
+    private final Clock clock;
 
     @Transactional(readOnly = true)
     @Override
@@ -82,7 +84,7 @@ public class CurrentUserAccessServiceImpl implements CurrentUserAccessService {
     }
 
     private List<UserRoleAssignment> loadActiveRoleAssignments(PortalUser portalUser) {
-        Instant now = Instant.now();
+        Instant now = clock.instant();
         return userRoleAssignmentRepository
                 .findByUser_IdAndActiveTrue(portalUser.getId())
                 .stream()

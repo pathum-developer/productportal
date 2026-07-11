@@ -3,12 +3,10 @@ package com.elvencode.productportal.security.filter;
 import com.elvencode.productportal.common.constants.ApplicationConstants;
 import com.elvencode.productportal.auth.session.service.AuthSessionService;
 import com.elvencode.productportal.security.authentication.ProductPortalAuthenticationContext;
-import com.elvencode.productportal.security.config.JwtProperties;
 import com.elvencode.productportal.security.service.CurrentUserAccessService;
 import com.elvencode.productportal.security.util.JwtUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,7 +19,6 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -35,7 +32,7 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
     @Qualifier("publicPaths")
     private final List<String> publicPaths;
 
-    private final JwtProperties jwtProperties;
+    private final JwtUtil jwtUtil;
     private final CurrentUserAccessService currentUserAccessService;
     private final AuthSessionService authSessionService;
 
@@ -46,11 +43,7 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
         try {
             Optional<String> bearerToken = resolveBearerToken(request);
             if (bearerToken.isPresent()) {
-                SecretKey secretKey = jwtProperties.signingKey();
-                Claims claims = Jwts.parser()
-                        .requireIssuer(jwtProperties.issuer())
-                        .verifyWith(secretKey)
-                        .build().parseSignedClaims(bearerToken.get()).getPayload();
+                Claims claims = jwtUtil.parseSignedClaims(bearerToken.get());
                 Long userId = readUserId(claims);
                 authSessionService.validateAccessTokenSession(readSessionId(claims), userId);
                 ProductPortalAuthenticationContext authenticationContext =

@@ -10,6 +10,7 @@ import com.elvencode.productportal.security.PathsConfig;
 import com.elvencode.productportal.security.config.JwtProperties;
 import com.elvencode.productportal.security.filter.JwtTokenValidatorFilter;
 import com.elvencode.productportal.security.service.CurrentUserAccessService;
+import com.elvencode.productportal.security.util.JwtUtil;
 import com.elvencode.productportal.user.address.controller.AddressController;
 import com.elvencode.productportal.user.controller.UserController;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,7 +21,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 
 import java.lang.reflect.Method;
+import java.time.Clock;
 import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
@@ -107,7 +111,9 @@ class AuthEndpointSecurityPathAlignmentTest {
         private TestableJwtTokenValidatorFilter(List<String> publicPaths) {
             super(
                     publicPaths,
-                    new JwtProperties(TEST_JWT_SECRET, Duration.ofMinutes(15), "Product Portal"),
+                    new JwtUtil(
+                            new JwtProperties(TEST_JWT_SECRET, Duration.ofMinutes(15), "Product Portal"),
+                            Clock.fixed(Instant.parse("2026-07-11T10:00:00Z"), ZoneOffset.UTC)),
                     mock(CurrentUserAccessService.class),
                     mock(AuthSessionService.class));
         }

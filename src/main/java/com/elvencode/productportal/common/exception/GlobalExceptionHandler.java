@@ -5,6 +5,7 @@ import com.elvencode.productportal.auth.protection.exception.LoginBlockedExcepti
 import com.elvencode.productportal.auth.session.exception.InvalidRefreshTokenException;
 import com.elvencode.productportal.common.dto.ErrorResponseDto;
 import com.elvencode.productportal.common.web.CorrelationIdContext;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -18,7 +19,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
-import java.time.Instant;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -27,10 +28,13 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice
 @Slf4j
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
 
     private static final String GENERIC_INTERNAL_SERVER_ERROR_MESSAGE =
             "An unexpected error occurred. Please contact support with the correlation ID.";
+
+    private final Clock clock;
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponseDto> handleResourceNotFoundException(
@@ -47,7 +51,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(LoginBlockedException.class)
     public ResponseEntity<ErrorResponseDto> handleLoginBlockedException(
             LoginBlockedException exception, WebRequest webRequest) {
-        Instant now = Instant.now();
         String correlationId = CorrelationIdContext.resolveOrCreate(webRequest);
         ErrorResponseDto errorResponseDto = buildErrorResponseDto(
                 webRequest,
@@ -56,7 +59,7 @@ public class GlobalExceptionHandler {
                 correlationId);
 
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
-                .header(HttpHeaders.RETRY_AFTER, String.valueOf(exception.retryAfterSeconds(now)))
+                .header(HttpHeaders.RETRY_AFTER, String.valueOf(exception.retryAfterSeconds(clock.instant())))
                 .header(CorrelationIdContext.HEADER_NAME, correlationId)
                 .body(errorResponseDto);
     }
@@ -156,7 +159,7 @@ public class GlobalExceptionHandler {
                 webRequest.getDescription(false),
                 httpStatus,
                 errorMessage,
-                LocalDateTime.now(),
+                LocalDateTime.now(clock),
                 correlationId);
     }
 

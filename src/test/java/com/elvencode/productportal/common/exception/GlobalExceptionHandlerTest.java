@@ -1,12 +1,19 @@
 package com.elvencode.productportal.common.exception;
 
+import com.elvencode.productportal.auth.protection.entity.LoginAttemptOutcome;
+import com.elvencode.productportal.auth.protection.exception.LoginBlockedException;
 import com.elvencode.productportal.common.dto.ErrorResponseDto;
 import com.elvencode.productportal.common.web.CorrelationIdContext;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.request.ServletWebRequest;
+
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -14,8 +21,10 @@ class GlobalExceptionHandlerTest {
 
     private static final String SAFE_INTERNAL_ERROR_MESSAGE =
             "An unexpected error occurred. Please contact support with the correlation ID.";
+    private static final Instant NOW = Instant.parse("2026-07-11T10:00:00Z");
 
-    private final GlobalExceptionHandler exceptionHandler = new GlobalExceptionHandler();
+    private final GlobalExceptionHandler exceptionHandler =
+            new GlobalExceptionHandler(Clock.fixed(NOW, ZoneOffset.UTC));
 
     @Test
     void genericExceptionShouldReturnSafeErrorMessageWithCorrelationId() {
@@ -66,6 +75,20 @@ class GlobalExceptionHandlerTest {
         assertThat(responseHeaderCorrelationId).isNotBlank();
         assertThat(body.correlationId()).isEqualTo(responseHeaderCorrelationId);
         assertThat(body.errorMessage()).doesNotContain("internal details");
+    }
+
+    @Test
+    void loginBlockedExceptionShouldCalculateRetryAfterFromConfiguredClock() {
+        ServletWebRequest webRequest = webRequestWithCorrelationId("blocked-request-789");
+
+        ResponseEntity<ErrorResponseDto> response = exceptionHandler.handleLoginBlockedException(
+                new LoginBlockedException(LoginAttemptOutcome.USERNAME_LOCKED, NOW.plusSeconds(90)),
+                webRequest);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.TOO_MANY_REQUESTS);
+        assertThat(response.getHeaders().getFirst(HttpHeaders.RETRY_AFTER)).isEqualTo("90");
+        assertThat(response.getHeaders().getFirst(CorrelationIdContext.HEADER_NAME))
+                .isEqualTo("blocked-request-789");
     }
 
     private ServletWebRequest webRequestWithCorrelationId(String correlationId) {

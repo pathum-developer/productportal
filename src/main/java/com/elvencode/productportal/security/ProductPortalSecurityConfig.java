@@ -6,6 +6,7 @@ import com.elvencode.productportal.auth.session.service.AuthSessionService;
 import com.elvencode.productportal.security.config.JwtProperties;
 import com.elvencode.productportal.security.filter.JwtTokenValidatorFilter;
 import com.elvencode.productportal.security.service.CurrentUserAccessService;
+import com.elvencode.productportal.security.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -45,7 +46,7 @@ public class ProductPortalSecurityConfig {
     @Qualifier("securedPaths")
     private final List<String> securedPaths;
 
-    private final JwtProperties jwtProperties;
+    private final JwtUtil jwtUtil;
     private final CurrentUserAccessService currentUserAccessService;
     private final AuthSessionService authSessionService;
 
@@ -63,7 +64,7 @@ public class ProductPortalSecurityConfig {
                 .addFilterBefore(
                         new JwtTokenValidatorFilter(
                                 publicPaths,
-                                jwtProperties,
+                                jwtUtil,
                                 currentUserAccessService,
                                 authSessionService),
                         UsernamePasswordAuthenticationFilter.class)

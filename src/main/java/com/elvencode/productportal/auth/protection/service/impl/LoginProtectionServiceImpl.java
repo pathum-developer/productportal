@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.util.Locale;
 import java.util.Optional;
@@ -28,6 +29,7 @@ public class LoginProtectionServiceImpl implements LoginProtectionService {
     private final AuthenticationProtectionProperties properties;
     private final LoginThrottleStateRepository throttleStateRepository;
     private final LoginAttemptAuditRepository auditRepository;
+    private final Clock clock;
 
     @Transactional(readOnly = true)
     @Override
@@ -37,7 +39,7 @@ public class LoginProtectionServiceImpl implements LoginProtectionService {
         }
 
         LoginRequestMetadata safeMetadata = safeMetadata(metadata);
-        Instant now = Instant.now();
+        Instant now = clock.instant();
 
         Optional<LoginBlockedException> ipBlock = findActiveBlock(
                 LoginThrottleScope.IP_ADDRESS,
@@ -63,7 +65,7 @@ public class LoginProtectionServiceImpl implements LoginProtectionService {
     public void recordBadCredentials(String username, Long userId, LoginRequestMetadata metadata) {
         LoginRequestMetadata safeMetadata = safeMetadata(metadata);
         String normalizedUsername = normalizeUsername(username);
-        Instant now = Instant.now();
+        Instant now = clock.instant();
         Instant lockedUntil = null;
 
         if (Boolean.TRUE.equals(properties.enabled())) {
@@ -92,7 +94,7 @@ public class LoginProtectionServiceImpl implements LoginProtectionService {
     public void recordSuccessfulLogin(String username, Long userId, LoginRequestMetadata metadata) {
         LoginRequestMetadata safeMetadata = safeMetadata(metadata);
         String normalizedUsername = normalizeUsername(username);
-        Instant now = Instant.now();
+        Instant now = clock.instant();
 
         if (Boolean.TRUE.equals(properties.enabled())) {
             throttleStateRepository
@@ -113,7 +115,7 @@ public class LoginProtectionServiceImpl implements LoginProtectionService {
             Long userId,
             LoginAttemptOutcome outcome,
             LoginRequestMetadata metadata) {
-        audit(normalizeUsername(username), userId, outcome, safeMetadata(metadata), null, Instant.now());
+        audit(normalizeUsername(username), userId, outcome, safeMetadata(metadata), null, clock.instant());
     }
 
     @Transactional
@@ -128,7 +130,7 @@ public class LoginProtectionServiceImpl implements LoginProtectionService {
                 exception.outcome(),
                 safeMetadata(metadata),
                 exception.retryAfter(),
-                Instant.now());
+                clock.instant());
     }
 
     private Optional<LoginBlockedException> findActiveBlock(

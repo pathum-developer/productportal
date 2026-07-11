@@ -13,8 +13,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,6 +29,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class LoginProtectionServiceImplTest {
+
+    private static final Instant NOW = Instant.parse("2026-07-11T10:00:00Z");
 
     private LoginThrottleStateRepository throttleStateRepository;
     private LoginAttemptAuditRepository auditRepository;
@@ -47,7 +51,8 @@ class LoginProtectionServiceImplTest {
                         Duration.ofMinutes(10),
                         false),
                 throttleStateRepository,
-                auditRepository);
+                auditRepository,
+                Clock.fixed(NOW, ZoneOffset.UTC));
 
         when(auditRepository.save(any(LoginAttemptAudit.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
@@ -103,7 +108,7 @@ class LoginProtectionServiceImplTest {
     @Test
     void shouldRejectActiveUsernameLock() {
         LoginThrottleState usernameState = LoginThrottleState.create(LoginThrottleScope.USERNAME, "alice");
-        Instant now = Instant.now();
+        Instant now = NOW;
         usernameState.recordFailure(now, 1, Duration.ofMinutes(15), Duration.ofMinutes(10));
 
         when(throttleStateRepository.findByScopeAndIdentifier(LoginThrottleScope.IP_ADDRESS, "10.0.0.10"))
@@ -123,7 +128,7 @@ class LoginProtectionServiceImplTest {
     void shouldAuditBlockedAttempt() {
         LoginBlockedException exception = new LoginBlockedException(
                 LoginAttemptOutcome.IP_THROTTLED,
-                Instant.now().plus(Duration.ofMinutes(10)));
+                NOW.plus(Duration.ofMinutes(10)));
 
         service.recordBlockedAttempt(
                 "Alice",
