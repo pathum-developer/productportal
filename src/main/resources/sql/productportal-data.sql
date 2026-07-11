@@ -1,4 +1,6 @@
 -- Seed data is ordered by foreign-key dependencies. Run productportal-schema.sql before this file.
+-- Authentication protection tables are intentionally not seeded:
+-- pp_t_login_throttle_state and pp_a_login_attempt are runtime security tables populated by login attempts.
 
 INSERT IGNORE INTO pp_m_role
     (role_code, display_name, description, sort_order)

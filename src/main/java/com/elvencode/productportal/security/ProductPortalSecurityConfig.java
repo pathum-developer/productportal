@@ -1,5 +1,6 @@
 package com.elvencode.productportal.security;
 
+import com.elvencode.productportal.auth.config.AuthenticationProtectionProperties;
 import com.elvencode.productportal.security.config.JwtProperties;
 import com.elvencode.productportal.security.filter.JwtTokenValidatorFilter;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +28,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-@EnableConfigurationProperties(JwtProperties.class)
+@EnableConfigurationProperties({JwtProperties.class, AuthenticationProtectionProperties.class})
 @RequiredArgsConstructor
 public class ProductPortalSecurityConfig {
 

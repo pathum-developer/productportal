@@ -1,7 +1,9 @@
 package com.elvencode.productportal.common.exception;
 
 
+import com.elvencode.productportal.auth.protection.exception.LoginBlockedException;
 import com.elvencode.productportal.common.dto.ErrorResponseDto;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
@@ -14,6 +16,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
 import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +41,19 @@ public class GlobalExceptionHandler {
                 webRequest.getDescription(false), HttpStatus.CONFLICT,
                 exception.getMessage(), LocalDateTime.now());
         return new ResponseEntity<>(errorResponseDto, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(LoginBlockedException.class)
+    public ResponseEntity<ErrorResponseDto> handleLoginBlockedException(
+            LoginBlockedException exception, WebRequest webRequest) {
+        Instant now = Instant.now();
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto(
+                webRequest.getDescription(false), HttpStatus.TOO_MANY_REQUESTS,
+                "Too many failed login attempts. Try again later.", LocalDateTime.now());
+
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .header(HttpHeaders.RETRY_AFTER, String.valueOf(exception.retryAfterSeconds(now)))
+                .body(errorResponseDto);
     }
 
     @ExceptionHandler(AuthenticationException.class)

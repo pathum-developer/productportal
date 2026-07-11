@@ -2,6 +2,7 @@ package com.elvencode.productportal.auth.controller;
 
 import com.elvencode.productportal.auth.dto.request.LoginRequest;
 import com.elvencode.productportal.auth.dto.response.LoginResponse;
+import com.elvencode.productportal.auth.protection.web.LoginRequestMetadataResolver;
 import com.elvencode.productportal.auth.service.AuthService;
 import com.elvencode.productportal.common.dto.ErrorResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,6 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
@@ -30,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
+    private final LoginRequestMetadataResolver metadataResolver;
 
     @Operation(
             summary = "Authenticate user",
@@ -56,10 +59,12 @@ public class AuthController {
             )
     })
     @PostMapping(path = "/login", consumes = MediaType.APPLICATION_JSON_VALUE, version = "1.0")
-    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<LoginResponse> login(
+            @Valid @RequestBody LoginRequest request,
+            HttpServletRequest httpRequest) {
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.noStore())
                 .header(HttpHeaders.PRAGMA, "no-cache")
-                .body(authService.login(request));
+                .body(authService.login(request, metadataResolver.resolve(httpRequest)));
     }
 }

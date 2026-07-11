@@ -2,6 +2,7 @@ package com.elvencode.productportal.auth.service.impl;
 
 import com.elvencode.productportal.auth.dto.request.LoginRequest;
 import com.elvencode.productportal.auth.dto.response.LoginResponse;
+import com.elvencode.productportal.auth.protection.dto.LoginRequestMetadata;
 import com.elvencode.productportal.auth.service.AuthService;
 import com.elvencode.productportal.security.principal.ProductPortalUserPrincipal;
 import com.elvencode.productportal.security.util.JwtUtil;
@@ -21,12 +22,15 @@ public class AuthServiceImpl implements AuthService {
     private final JwtUtil jwtUtil;
 
     @Override
-    public LoginResponse login(LoginRequest loginRequest) {
+    public LoginResponse login(LoginRequest loginRequest, LoginRequestMetadata metadata) {
 
-        var authentication = authenticationManager.authenticate(
+        UsernamePasswordAuthenticationToken authenticationRequest =
                 new UsernamePasswordAuthenticationToken(
                         normalizeUsername(loginRequest.username()),
-                        loginRequest.password()));
+                        loginRequest.password());
+        authenticationRequest.setDetails(metadata);
+
+        var authentication = authenticationManager.authenticate(authenticationRequest);
 
         Instant issuedAt = Instant.now();
         Instant expiresAt = jwtUtil.calculateAccessTokenExpiresAt(issuedAt);

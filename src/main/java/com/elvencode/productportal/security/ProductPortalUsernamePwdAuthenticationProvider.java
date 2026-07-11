@@ -4,6 +4,10 @@ import com.elvencode.productportal.access.assignment.entity.UserRoleAssignment;
 import com.elvencode.productportal.access.assignment.repository.UserRoleAssignmentRepository;
 import com.elvencode.productportal.access.permission.entity.RolePermissionGrant;
 import com.elvencode.productportal.access.permission.repository.RolePermissionGrantRepository;
+import com.elvencode.productportal.auth.protection.dto.LoginRequestMetadata;
+import com.elvencode.productportal.auth.protection.entity.LoginAttemptOutcome;
+import com.elvencode.productportal.auth.protection.exception.LoginBlockedException;
+import com.elvencode.productportal.auth.protection.service.LoginProtectionService;
 import com.elvencode.productportal.security.principal.ProductPortalUserPrincipal;
 import com.elvencode.productportal.user.entity.PortalUser;
 import com.elvencode.productportal.user.repository.UserRepository;
@@ -16,7 +20,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -33,29 +36,59 @@ public class ProductPortalUsernamePwdAuthenticationProvider implements Authentic
 
     private static final String ACTIVE_STATUS_CODE = "ACTIVE";
     private static final String ROLE_PREFIX = "ROLE_";
+    private static final String DUMMY_PASSWORD_HASH =
+            "$2a$10$dXJ3SW6G7P50lGmMkk8WHe0b1BNkQonYgp7KYYb3RjW7TEkLHAeWO";
 
     private final UserRepository userRepository;
     private final UserRoleAssignmentRepository userRoleAssignmentRepository;
     private final RolePermissionGrantRepository rolePermissionGrantRepository;
     private final PasswordEncoder passwordEncoder;
+    private final LoginProtectionService loginProtectionService;
 
     @Override
     public @Nullable Authentication authenticate(Authentication authentication) throws AuthenticationException {
         String username = authentication.getName().trim().toLowerCase(Locale.ROOT);
         String password = authentication.getCredentials().toString();
+        LoginRequestMetadata metadata = resolveMetadata(authentication);
 
-        PortalUser portalUser = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException(
-                        "User details not found for the user: " + username)
-                );
+        try {
+            loginProtectionService.assertLoginAllowed(username, metadata);
+        } catch (LoginBlockedException exception) {
+            loginProtectionService.recordBlockedAttempt(username, exception, metadata);
+            throw exception;
+        }
 
-        validateAccountCanAuthenticate(portalUser);
+        PortalUser portalUser = userRepository.findByUsername(username).orElse(null);
+        if (portalUser == null) {
+            passwordEncoder.matches(password, DUMMY_PASSWORD_HASH);
+            loginProtectionService.recordBadCredentials(username, null, metadata);
+            throw new BadCredentialsException("Invalid username or password");
+        }
 
         if (!passwordEncoder.matches(password, portalUser.getPasswordHash())) {
-            throw new BadCredentialsException("Invalid password!");
+            loginProtectionService.recordBadCredentials(username, portalUser.getId(), metadata);
+            throw new BadCredentialsException("Invalid username or password");
+        }
+
+        if (!canAccountAuthenticate(portalUser)) {
+            loginProtectionService.recordSecurityFailure(
+                    username,
+                    portalUser.getId(),
+                    LoginAttemptOutcome.ACCOUNT_DISABLED,
+                    metadata);
+            throw new DisabledException("User account is not active");
         }
 
         List<UserRoleAssignment> activeAssignments = loadActiveRoleAssignments(portalUser);
+        if (activeAssignments.isEmpty()) {
+            loginProtectionService.recordSecurityFailure(
+                    username,
+                    portalUser.getId(),
+                    LoginAttemptOutcome.NO_ACTIVE_ROLE_ASSIGNMENT,
+                    metadata);
+            throw new DisabledException("User has no active role assignments");
+        }
+
         List<String> roleCodes = extractRoleCodes(activeAssignments);
         List<String> permissionCodes = loadPermissionCodes(roleCodes);
         Long primaryOrganizationId = resolvePrimaryOrganizationId(portalUser, activeAssignments);
@@ -71,6 +104,7 @@ public class ProductPortalUsernamePwdAuthenticationProvider implements Authentic
                 portalUser.getStatus().getStatusCode());
 
         List<SimpleGrantedAuthority> authorities = buildAuthorities(roleCodes, permissionCodes);
+        loginProtectionService.recordSuccessfulLogin(username, portalUser.getId(), metadata);
 
         return new UsernamePasswordAuthenticationToken(principal, null, authorities);
     }
@@ -80,17 +114,22 @@ public class ProductPortalUsernamePwdAuthenticationProvider implements Authentic
         return (UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication));
     }
 
-    private void validateAccountCanAuthenticate(PortalUser portalUser) {
-        if (!ACTIVE_STATUS_CODE.equals(portalUser.getStatus().getStatusCode())
-                || !Boolean.TRUE.equals(portalUser.getStatus().getActive())) {
-            throw new DisabledException("User account is not active");
+    private LoginRequestMetadata resolveMetadata(Authentication authentication) {
+        Object details = authentication.getDetails();
+        if (details instanceof LoginRequestMetadata metadata) {
+            return metadata;
         }
+        return LoginRequestMetadata.unknown();
+    }
 
+    private boolean canAccountAuthenticate(PortalUser portalUser) {
+        return ACTIVE_STATUS_CODE.equals(portalUser.getStatus().getStatusCode())
+                && Boolean.TRUE.equals(portalUser.getStatus().getActive());
     }
 
     private List<UserRoleAssignment> loadActiveRoleAssignments(PortalUser portalUser) {
         Instant now = Instant.now();
-        List<UserRoleAssignment> activeAssignments = userRoleAssignmentRepository
+        return userRoleAssignmentRepository
                 .findByUser_IdAndActiveTrue(portalUser.getId())
                 .stream()
                 .filter(assignment -> assignment.isCurrentlyActive(now))
@@ -98,12 +137,6 @@ public class ProductPortalUsernamePwdAuthenticationProvider implements Authentic
                         .comparing((UserRoleAssignment assignment) -> assignment.getRole().getSortOrder())
                         .thenComparing(assignment -> assignment.getRole().getRoleCode()))
                 .toList();
-
-        if (activeAssignments.isEmpty()) {
-            throw new DisabledException("User has no active role assignments");
-        }
-
-        return activeAssignments;
     }
 
     private List<String> extractRoleCodes(List<UserRoleAssignment> activeAssignments) {
