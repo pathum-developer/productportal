@@ -5,18 +5,16 @@ import com.elvencode.productportal.security.principal.ProductPortalUserPrincipal
 import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.time.Instant;
 import java.util.Date;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
 public class JwtUtil {
-
-    private static final long ACCESS_TOKEN_VALIDITY_SECONDS = 24 * 60 * 60;
 
     private final JwtProperties jwtProperties;
 
@@ -30,29 +28,20 @@ public class JwtUtil {
         Instant expiresAt = calculateAccessTokenExpiresAt(issuedAt);
 
         return Jwts.builder()
-                .issuer("Product Portal")
-                .subject(principal.username())
+                .issuer(jwtProperties.issuer())
+                .id(UUID.randomUUID().toString())
+                .subject(String.valueOf(principal.userId()))
                 .claim("userId", principal.userId())
-                .claim("username", principal.username())
-                .claim("email", principal.email())
-                .claim("phoneNumber", principal.phoneNumber())
-                .claim("primaryOrganizationId", principal.primaryOrganizationId())
-                .claim("roleCodes", principal.roleCodes())
-                .claim("permissionCodes", principal.permissionCodes())
-                .claim("status", principal.statusCode())
-                .claim("authorities", authentication.getAuthorities()
-                        .stream().map(GrantedAuthority::getAuthority)
-                        .toList())
                 .issuedAt(Date.from(issuedAt))
                 .expiration(Date.from(expiresAt))
                 .signWith(secretKey).compact();
     }
 
     public long getAccessTokenValiditySeconds() {
-        return ACCESS_TOKEN_VALIDITY_SECONDS;
+        return jwtProperties.accessTokenTtl().toSeconds();
     }
 
     public Instant calculateAccessTokenExpiresAt(Instant issuedAt) {
-        return issuedAt.plusSeconds(ACCESS_TOKEN_VALIDITY_SECONDS);
+        return issuedAt.plus(jwtProperties.accessTokenTtl());
     }
 }

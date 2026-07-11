@@ -1,8 +1,9 @@
 package com.elvencode.productportal.security.filter;
 
 import com.elvencode.productportal.common.constants.ApplicationConstants;
+import com.elvencode.productportal.security.authentication.ProductPortalAuthenticationContext;
 import com.elvencode.productportal.security.config.JwtProperties;
-import com.elvencode.productportal.security.principal.ProductPortalUserPrincipal;
+import com.elvencode.productportal.security.service.CurrentUserAccessService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -13,9 +14,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.StringUtils;
@@ -24,7 +22,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 public class JwtTokenValidatorFilter extends OncePerRequestFilter {
@@ -35,35 +33,32 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
     private final List<String> publicPaths;
 
     private final JwtProperties jwtProperties;
+    private final CurrentUserAccessService currentUserAccessService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        String authHeader = request.getHeader(ApplicationConstants.JWT_HEADER);
-
-        if (null != authHeader) {
-            try {
-                // Extract the JWT token
-                // Whoever bears (holds) the token is trusted and can access the protected resource.
-                String jwt = authHeader.substring(7); // Remove 'Bearer ' prefix
+        try {
+            Optional<String> bearerToken = resolveBearerToken(request);
+            if (bearerToken.isPresent()) {
                 SecretKey secretKey = jwtProperties.signingKey();
                 Claims claims = Jwts.parser()
+                        .requireIssuer(jwtProperties.issuer())
                         .verifyWith(secretKey)
-                        .build().parseSignedClaims(jwt).getPayload();
-                ProductPortalUserPrincipal principal = toPrincipal(claims);
-                List<SimpleGrantedAuthority> authorities = toAuthorities(claims);
-                Authentication authentication = new UsernamePasswordAuthenticationToken(principal,
-                        null, authorities);
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            } catch (ExpiredJwtException exception) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.getWriter().write("Token Expired");
-                return;
-            } catch (Exception exception) {
-                throw new BadCredentialsException("Invalid Token received!");
+                        .build().parseSignedClaims(bearerToken.get()).getPayload();
+                ProductPortalAuthenticationContext authenticationContext =
+                        currentUserAccessService.loadContextByUserId(readUserId(claims));
+                SecurityContextHolder.getContext().setAuthentication(authenticationContext.toAuthentication());
             }
+        } catch (ExpiredJwtException exception) {
+            SecurityContextHolder.clearContext();
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token expired");
+            return;
+        } catch (Exception exception) {
+            SecurityContextHolder.clearContext();
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid token");
+            return;
         }
         filterChain.doFilter(request, response);
 
@@ -76,40 +71,34 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
                 pathMatcher.match(publicPath, path));
     }
 
-    private ProductPortalUserPrincipal toPrincipal(Claims claims) {
-        Number userId = claims.get("userId", Number.class);
-        Number primaryOrganizationId = claims.get("primaryOrganizationId", Number.class);
-        List<String> roleCodes = readStringListClaim(claims, "roleCodes");
-
-        return new ProductPortalUserPrincipal(
-                userId.longValue(),
-                claims.get("username", String.class),
-                claims.get("email", String.class),
-                claims.get("phoneNumber", String.class),
-                primaryOrganizationId == null ? null : primaryOrganizationId.longValue(),
-                roleCodes,
-                readStringListClaim(claims, "permissionCodes"),
-                claims.get("status", String.class));
-    }
-
-    private List<SimpleGrantedAuthority> toAuthorities(Claims claims) {
-        List<String> authorityNames = readStringListClaim(claims, "authorities");
-
-        return authorityNames.stream()
-                .filter(StringUtils::hasText)
-                .map(SimpleGrantedAuthority::new)
-                .toList();
-    }
-
-    private List<String> readStringListClaim(Claims claims, String claimName) {
-        Object value = claims.get(claimName);
-        if (value instanceof List<?> values) {
-            return values.stream()
-                    .filter(Objects::nonNull)
-                    .map(Object::toString)
-                    .filter(StringUtils::hasText)
-                    .toList();
+    private Optional<String> resolveBearerToken(HttpServletRequest request) {
+        String authHeader = request.getHeader(ApplicationConstants.JWT_HEADER);
+        if (!StringUtils.hasText(authHeader)) {
+            return Optional.empty();
         }
-        return List.of();
+
+        if (!authHeader.startsWith("Bearer ")) {
+            throw new BadCredentialsException("Invalid Authorization header");
+        }
+
+        String token = authHeader.substring(7).trim();
+        if (!StringUtils.hasText(token)) {
+            throw new BadCredentialsException("Bearer token is empty");
+        }
+
+        return Optional.of(token);
+    }
+
+    private Long readUserId(Claims claims) {
+        Number userId = claims.get("userId", Number.class);
+        if (userId != null) {
+            return userId.longValue();
+        }
+
+        try {
+            return Long.valueOf(claims.getSubject());
+        } catch (NumberFormatException | NullPointerException exception) {
+            throw new BadCredentialsException("Token subject is not a valid user id", exception);
+        }
     }
 }

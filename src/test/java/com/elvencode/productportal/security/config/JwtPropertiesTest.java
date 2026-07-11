@@ -35,8 +35,19 @@ class JwtPropertiesTest {
                     JwtProperties jwtProperties = context.getBean(JwtProperties.class);
 
                     assertThat(jwtProperties.secret()).isEqualTo(STRONG_SECRET);
+                    assertThat(jwtProperties.accessTokenTtl()).isEqualTo(java.time.Duration.ofMinutes(15));
+                    assertThat(jwtProperties.issuer()).isEqualTo("Product Portal");
                     assertThat(jwtProperties.signingKey()).isNotNull();
                 });
+    }
+
+    @Test
+    void shouldFailStartupWhenAccessTokenTtlIsNotPositive() {
+        contextRunner
+                .withPropertyValues(
+                        "jwt.secret=" + STRONG_SECRET,
+                        "jwt.access-token-ttl=0s")
+                .run(context -> assertThat(context).hasFailed());
     }
 
     @Configuration

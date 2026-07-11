@@ -1,14 +1,12 @@
 package com.elvencode.productportal.security;
 
-import com.elvencode.productportal.access.assignment.entity.UserRoleAssignment;
-import com.elvencode.productportal.access.assignment.repository.UserRoleAssignmentRepository;
-import com.elvencode.productportal.access.permission.entity.RolePermissionGrant;
-import com.elvencode.productportal.access.permission.repository.RolePermissionGrantRepository;
 import com.elvencode.productportal.auth.protection.dto.LoginRequestMetadata;
 import com.elvencode.productportal.auth.protection.entity.LoginAttemptOutcome;
 import com.elvencode.productportal.auth.protection.exception.LoginBlockedException;
 import com.elvencode.productportal.auth.protection.service.LoginProtectionService;
-import com.elvencode.productportal.security.principal.ProductPortalUserPrincipal;
+import com.elvencode.productportal.security.authentication.ProductPortalAuthenticationContext;
+import com.elvencode.productportal.security.exception.CurrentUserAccessDeniedException;
+import com.elvencode.productportal.security.service.CurrentUserAccessService;
 import com.elvencode.productportal.user.entity.PortalUser;
 import com.elvencode.productportal.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,31 +17,22 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
-import java.util.Comparator;
-import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
 public class ProductPortalUsernamePwdAuthenticationProvider implements AuthenticationProvider {
 
-    private static final String ACTIVE_STATUS_CODE = "ACTIVE";
-    private static final String ROLE_PREFIX = "ROLE_";
     private static final String DUMMY_PASSWORD_HASH =
             "$2a$10$dXJ3SW6G7P50lGmMkk8WHe0b1BNkQonYgp7KYYb3RjW7TEkLHAeWO";
 
     private final UserRepository userRepository;
-    private final UserRoleAssignmentRepository userRoleAssignmentRepository;
-    private final RolePermissionGrantRepository rolePermissionGrantRepository;
     private final PasswordEncoder passwordEncoder;
     private final LoginProtectionService loginProtectionService;
+    private final CurrentUserAccessService currentUserAccessService;
 
     @Override
     public @Nullable Authentication authenticate(Authentication authentication) throws AuthenticationException {
@@ -70,43 +59,13 @@ public class ProductPortalUsernamePwdAuthenticationProvider implements Authentic
             throw new BadCredentialsException("Invalid username or password");
         }
 
-        if (!canAccountAuthenticate(portalUser)) {
-            loginProtectionService.recordSecurityFailure(
-                    username,
-                    portalUser.getId(),
-                    LoginAttemptOutcome.ACCOUNT_DISABLED,
-                    metadata);
-            throw new DisabledException("User account is not active");
-        }
-
-        List<UserRoleAssignment> activeAssignments = loadActiveRoleAssignments(portalUser);
-        if (activeAssignments.isEmpty()) {
-            loginProtectionService.recordSecurityFailure(
-                    username,
-                    portalUser.getId(),
-                    LoginAttemptOutcome.NO_ACTIVE_ROLE_ASSIGNMENT,
-                    metadata);
-            throw new DisabledException("User has no active role assignments");
-        }
-
-        List<String> roleCodes = extractRoleCodes(activeAssignments);
-        List<String> permissionCodes = loadPermissionCodes(roleCodes);
-        Long primaryOrganizationId = resolvePrimaryOrganizationId(portalUser, activeAssignments);
-
-        ProductPortalUserPrincipal principal = new ProductPortalUserPrincipal(
-                portalUser.getId(),
-                portalUser.getUsername(),
-                portalUser.getEmail(),
-                portalUser.getPhoneNumber(),
-                primaryOrganizationId,
-                roleCodes,
-                permissionCodes,
-                portalUser.getStatus().getStatusCode());
-
-        List<SimpleGrantedAuthority> authorities = buildAuthorities(roleCodes, permissionCodes);
+        ProductPortalAuthenticationContext authenticationContext = buildAuthenticationContext(
+                username,
+                portalUser,
+                metadata);
         loginProtectionService.recordSuccessfulLogin(username, portalUser.getId(), metadata);
 
-        return new UsernamePasswordAuthenticationToken(principal, null, authorities);
+        return authenticationContext.toAuthentication();
     }
 
     @Override
@@ -122,70 +81,27 @@ public class ProductPortalUsernamePwdAuthenticationProvider implements Authentic
         return LoginRequestMetadata.unknown();
     }
 
-    private boolean canAccountAuthenticate(PortalUser portalUser) {
-        return ACTIVE_STATUS_CODE.equals(portalUser.getStatus().getStatusCode())
-                && Boolean.TRUE.equals(portalUser.getStatus().getActive());
-    }
-
-    private List<UserRoleAssignment> loadActiveRoleAssignments(PortalUser portalUser) {
-        Instant now = Instant.now();
-        return userRoleAssignmentRepository
-                .findByUser_IdAndActiveTrue(portalUser.getId())
-                .stream()
-                .filter(assignment -> assignment.isCurrentlyActive(now))
-                .sorted(Comparator
-                        .comparing((UserRoleAssignment assignment) -> assignment.getRole().getSortOrder())
-                        .thenComparing(assignment -> assignment.getRole().getRoleCode()))
-                .toList();
-    }
-
-    private List<String> extractRoleCodes(List<UserRoleAssignment> activeAssignments) {
-        return activeAssignments.stream()
-                .map(assignment -> assignment.getRole().getRoleCode())
-                .distinct()
-                .toList();
-    }
-
-    private List<String> loadPermissionCodes(List<String> roleCodes) {
-        return rolePermissionGrantRepository.findByRole_RoleCodeInAndActiveTrue(roleCodes)
-                .stream()
-                .filter(RolePermissionGrant::isCurrentlyActive)
-                .sorted(Comparator
-                        .comparing((RolePermissionGrant grant) -> grant.getPermission().getSortOrder())
-                        .thenComparing(grant -> grant.getPermission().getPermissionCode()))
-                .map(grant -> grant.getPermission().getPermissionCode())
-                .distinct()
-                .toList();
-    }
-
-    private Long resolvePrimaryOrganizationId(
+    private ProductPortalAuthenticationContext buildAuthenticationContext(
+            String username,
             PortalUser portalUser,
-            List<UserRoleAssignment> activeAssignments) {
-        if (portalUser.getPrimaryOrganization() != null) {
-            return portalUser.getPrimaryOrganization().getId();
+            LoginRequestMetadata metadata) {
+        try {
+            return currentUserAccessService.buildContext(portalUser);
+        } catch (CurrentUserAccessDeniedException exception) {
+            loginProtectionService.recordSecurityFailure(
+                    username,
+                    portalUser.getId(),
+                    toLoginAttemptOutcome(exception),
+                    metadata);
+            throw new DisabledException(exception.getMessage(), exception);
         }
-        return activeAssignments.get(0).getOrganization().getId();
     }
 
-    private List<SimpleGrantedAuthority> buildAuthorities(List<String> roleCodes, List<String> permissionCodes) {
-        Set<String> authorityNames = new LinkedHashSet<>();
-        roleCodes.stream()
-                .map(this::toRoleAuthority)
-                .forEach(authorityNames::add);
-        permissionCodes.stream()
-                .map(this::toPermissionAuthority)
-                .forEach(authorityNames::add);
-
-        return authorityNames.stream()
-                .map(SimpleGrantedAuthority::new)
-                .toList();
-    }
-
-    private String toRoleAuthority(String roleCode) {
-        return roleCode.startsWith(ROLE_PREFIX) ? roleCode : ROLE_PREFIX + roleCode;
-    }
-
-    private String toPermissionAuthority(String permissionCode) {
-        return "PERMISSION_" + permissionCode;
+    private LoginAttemptOutcome toLoginAttemptOutcome(CurrentUserAccessDeniedException exception) {
+        return switch (exception.reason()) {
+            case ACCOUNT_DISABLED -> LoginAttemptOutcome.ACCOUNT_DISABLED;
+            case NO_ACTIVE_ROLE_ASSIGNMENT -> LoginAttemptOutcome.NO_ACTIVE_ROLE_ASSIGNMENT;
+            case USER_NOT_FOUND -> LoginAttemptOutcome.BAD_CREDENTIALS;
+        };
     }
 }
