@@ -1,14 +1,26 @@
 package com.elvencode.productportal.common.config.web;
 
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.config.annotation.ApiVersionConfigurer;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.util.List;
+
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
+
+    private static final String API_PATH_PREFIX = "/api";
+    private static final List<String> API_CONTROLLER_PACKAGE_ROOTS = List.of(
+            "com.elvencode.productportal.auth",
+            "com.elvencode.productportal.user",
+            "com.elvencode.productportal.catalog",
+            "com.elvencode.productportal.access",
+            "com.elvencode.productportal.organization");
 
     @Override
     public void configureApiVersioning(ApiVersionConfigurer configurer) {
@@ -19,17 +31,27 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void configurePathMatch(PathMatchConfigurer configurer) {
-        configurer.addPathPrefix("/api", _ -> true);
+        configurer.addPathPrefix(API_PATH_PREFIX, WebConfig::isProductionApiController);
     }
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/api/**")
+        registry.addMapping(API_PATH_PREFIX + "/**")
                 .allowedOrigins("http://localhost:5173")
                 .allowedMethods("*")
                 .allowedHeaders("*")
                 .exposedHeaders("*")
                 .allowCredentials(true)
                 .maxAge(3600);
+    }
+
+    private static boolean isProductionApiController(Class<?> handlerType) {
+        return AnnotationUtils.findAnnotation(handlerType, RestController.class) != null
+                && isProductionApiPackage(handlerType.getPackageName());
+    }
+
+    private static boolean isProductionApiPackage(String packageName) {
+        return API_CONTROLLER_PACKAGE_ROOTS.stream()
+                .anyMatch(root -> packageName.equals(root) || packageName.startsWith(root + "."));
     }
 }
