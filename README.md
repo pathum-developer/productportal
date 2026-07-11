@@ -107,9 +107,10 @@ com.elvencode.productportal
 
 ### Authentication & Authorization
 - ✅ JWT token-based authentication
+- ✅ Fail-fast JWT signing secret validation
 - ✅ Multi-role RBAC with permission authorities
 - ✅ Spring Security integration
-- ✅ Token refresh mechanism
+- ✅ Stateless bearer token validation
 
 ### API Documentation
 - ✅ OpenAPI 3.0 (Swagger) auto-documentation
@@ -170,18 +171,48 @@ com.elvencode.productportal
            ddl-auto: validate  # or 'update' for dev
      ```
 
-3. **Start MySQL (via Docker Compose):**
+3. **Configure JWT signing:**
+   - `src/main/resources/application.properties` contains:
+     ```properties
+     jwt.secret=${JWT_SECRET}
+     ```
+   - Keep the real secret outside source control.
+   - Set `JWT_SECRET` before starting the app.
+   - The secret must be at least 64 UTF-8 bytes.
+   - Generate a strong secret with PowerShell:
+     ```powershell
+     $bytes = New-Object byte[] 64
+     [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes)
+     $env:JWT_SECRET = [Convert]::ToBase64String($bytes)
+     ```
+   - Or set an existing secret manually in PowerShell:
+     ```powershell
+     $env:JWT_SECRET="replace-with-a-64-plus-character-secret-from-your-secret-manager"
+     ```
+   - For Bash:
+     ```bash
+     export JWT_SECRET="replace-with-a-64-plus-character-secret-from-your-secret-manager"
+     ```
+   - IntelliJ IDEA:
+     1. Open `Run` -> `Edit Configurations...`
+     2. Select `ProductportalApplication`
+     3. Click `Modify options`
+     4. Enable `Environment variables`
+     5. Add `JWT_SECRET=your-64-plus-character-secret`
+     6. Apply and run
+
+4. **Start MySQL (via Docker Compose):**
    ```bash
    docker-compose up -d
    ```
 
-4. **Build and run:**
+5. **Build and run:**
    ```bash
    mvn clean install
    mvn spring-boot:run
    ```
 
-5. **Verify startup:**
+6. **Verify startup:**
    - API base URL: `http://localhost:8080`
    - Swagger UI: `http://localhost:8080/swagger-ui.html`
 
@@ -339,6 +370,23 @@ logging:
 Successful UserServiceImpl.getAllUsersByStatus(..) after 45 ms
 Failed UserServiceImpl.getAllUsersByStatus(..) after 1200 ms
 ```
+
+### Learning Login Execution Trace
+
+The login execution tracing aspect is disabled by default. Enable it only for local learning/debugging:
+
+```properties
+auth.login-trace.enabled=true
+```
+
+In IntelliJ IDEA, you can keep `application.properties` unchanged and add this as a program argument:
+
+```text
+--auth.login-trace.enabled=true
+```
+
+This traces method names and execution time during `AuthController.login()` without logging request bodies,
+passwords, or JWT tokens.
 
 ---
 

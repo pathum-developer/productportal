@@ -1,17 +1,14 @@
 package com.elvencode.productportal.security.util;
 
-import com.elvencode.productportal.common.constants.ApplicationConstants;
+import com.elvencode.productportal.security.config.JwtProperties;
 import com.elvencode.productportal.security.principal.ProductPortalUserPrincipal;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.env.Environment;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Date;
 
@@ -21,16 +18,14 @@ public class JwtUtil {
 
     private static final long ACCESS_TOKEN_VALIDITY_SECONDS = 24 * 60 * 60;
 
-    private final Environment env;
+    private final JwtProperties jwtProperties;
 
     public String generateJwtToken(Authentication authentication) {
         return generateJwtToken(authentication, Instant.now());
     }
 
     public String generateJwtToken(Authentication authentication, Instant issuedAt) {
-        String secret = env.getProperty(ApplicationConstants.JWT_SECRET_KEY,
-                ApplicationConstants.JWT_SECRET_DEFAULT_VALUE);
-        SecretKey secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        SecretKey secretKey = jwtProperties.signingKey();
         ProductPortalUserPrincipal principal = (ProductPortalUserPrincipal) authentication.getPrincipal();
         Instant expiresAt = calculateAccessTokenExpiresAt(issuedAt);
 

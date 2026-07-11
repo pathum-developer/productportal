@@ -1,8 +1,10 @@
 package com.elvencode.productportal.security;
 
+import com.elvencode.productportal.security.config.JwtProperties;
 import com.elvencode.productportal.security.filter.JwtTokenValidatorFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,6 +27,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@EnableConfigurationProperties(JwtProperties.class)
 @RequiredArgsConstructor
 public class ProductPortalSecurityConfig {
 
@@ -33,6 +36,8 @@ public class ProductPortalSecurityConfig {
 
     @Qualifier("securedPaths")
     private final List<String> securedPaths;
+
+    private final JwtProperties jwtProperties;
 
     @Bean
     SecurityFilterChain customSecurityFilterChain(HttpSecurity http) {
@@ -45,7 +50,9 @@ public class ProductPortalSecurityConfig {
                         securedPaths.forEach(path -> requests.requestMatchers(path).authenticated());
                         requests.anyRequest().denyAll();
                     })
-                .addFilterBefore(new JwtTokenValidatorFilter(publicPaths), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(
+                        new JwtTokenValidatorFilter(publicPaths, jwtProperties),
+                        UsernamePasswordAuthenticationFilter.class)
                 .formLogin(flc -> flc.disable())
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .build();
