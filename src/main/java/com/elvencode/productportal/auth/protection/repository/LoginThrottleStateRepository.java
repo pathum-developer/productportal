@@ -5,12 +5,23 @@ import com.elvencode.productportal.auth.protection.entity.LoginThrottleState;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
 public interface LoginThrottleStateRepository extends JpaRepository<LoginThrottleState, Long> {
+
+    @Modifying(flushAutomatically = true)
+    @Query(value = """
+            INSERT INTO pp_t_login_throttle_state (scope, identifier_value)
+            VALUES (:scope, :identifier)
+            ON DUPLICATE KEY UPDATE throttle_state_id = throttle_state_id
+            """, nativeQuery = true)
+    int insertIfAbsent(
+            @Param("scope") String scope,
+            @Param("identifier") String identifier);
 
     Optional<LoginThrottleState> findByScopeAndIdentifier(
             LoginThrottleScope scope,

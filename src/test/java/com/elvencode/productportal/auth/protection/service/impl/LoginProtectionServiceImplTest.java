@@ -11,6 +11,7 @@ import com.elvencode.productportal.auth.protection.repository.LoginAttemptAuditR
 import com.elvencode.productportal.auth.protection.repository.LoginThrottleStateRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InOrder;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -19,7 +20,9 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -67,7 +70,34 @@ class LoginProtectionServiceImplTest {
 
         assertThat(usernameState.getFailedAttemptCount()).isEqualTo(1);
         assertThat(ipState.getFailedAttemptCount()).isEqualTo(1);
+        verify(throttleStateRepository).insertIfAbsent(LoginThrottleScope.USERNAME.name(), "alice");
+        verify(throttleStateRepository).insertIfAbsent(LoginThrottleScope.IP_ADDRESS.name(), "10.0.0.10");
+        verify(throttleStateRepository, never()).save(any(LoginThrottleState.class));
         verify(auditRepository).save(any(LoginAttemptAudit.class));
+    }
+
+    @Test
+    void shouldInitializeThrottleStateBeforeAcquiringUpdateLock() {
+        LoginThrottleState usernameState = LoginThrottleState.create(LoginThrottleScope.USERNAME, "alice");
+        LoginThrottleState ipState = LoginThrottleState.create(LoginThrottleScope.IP_ADDRESS, "10.0.0.10");
+
+        when(throttleStateRepository.findByScopeAndIdentifierForUpdate(LoginThrottleScope.USERNAME, "alice"))
+                .thenReturn(Optional.of(usernameState));
+        when(throttleStateRepository.findByScopeAndIdentifierForUpdate(LoginThrottleScope.IP_ADDRESS, "10.0.0.10"))
+                .thenReturn(Optional.of(ipState));
+
+        service.recordBadCredentials(
+                "Alice",
+                42L,
+                new LoginRequestMetadata("10.0.0.10", "JUnit"));
+
+        InOrder inOrder = inOrder(throttleStateRepository);
+        inOrder.verify(throttleStateRepository).insertIfAbsent(LoginThrottleScope.USERNAME.name(), "alice");
+        inOrder.verify(throttleStateRepository)
+                .findByScopeAndIdentifierForUpdate(LoginThrottleScope.USERNAME, "alice");
+        inOrder.verify(throttleStateRepository).insertIfAbsent(LoginThrottleScope.IP_ADDRESS.name(), "10.0.0.10");
+        inOrder.verify(throttleStateRepository)
+                .findByScopeAndIdentifierForUpdate(LoginThrottleScope.IP_ADDRESS, "10.0.0.10");
     }
 
     @Test

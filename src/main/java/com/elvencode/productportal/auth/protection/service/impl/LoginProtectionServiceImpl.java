@@ -142,8 +142,11 @@ public class LoginProtectionServiceImpl implements LoginProtectionService {
     }
 
     private LoginThrottleState stateForUpdate(LoginThrottleScope scope, String identifier) {
+        throttleStateRepository.insertIfAbsent(scope.name(), identifier);
+
         return throttleStateRepository.findByScopeAndIdentifierForUpdate(scope, identifier)
-                .orElseGet(() -> throttleStateRepository.save(LoginThrottleState.create(scope, identifier)));
+                .orElseThrow(() -> new IllegalStateException(
+                        "Login throttle state could not be initialized for scope " + scope));
     }
 
     private void audit(
