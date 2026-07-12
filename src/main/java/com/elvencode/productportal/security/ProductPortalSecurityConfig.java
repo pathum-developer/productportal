@@ -3,6 +3,7 @@ package com.elvencode.productportal.security;
 import com.elvencode.productportal.auth.config.AuthenticationProtectionProperties;
 import com.elvencode.productportal.auth.session.config.AuthenticationSessionProperties;
 import com.elvencode.productportal.auth.session.service.AuthSessionService;
+import com.elvencode.productportal.common.web.HttpErrorResponseWriter;
 import com.elvencode.productportal.security.config.CorsProperties;
 import com.elvencode.productportal.security.config.JwtProperties;
 import com.elvencode.productportal.security.filter.JwtTokenValidatorFilter;
@@ -50,6 +51,7 @@ public class ProductPortalSecurityConfig {
     private final CurrentUserAccessService currentUserAccessService;
     private final AuthSessionService authSessionService;
     private final CorsProperties corsProperties;
+    private final HttpErrorResponseWriter errorResponseWriter;
 
     @Bean
     SecurityFilterChain customSecurityFilterChain(HttpSecurity http) {
@@ -67,7 +69,8 @@ public class ProductPortalSecurityConfig {
                                 publicPaths,
                                 jwtUtil,
                                 currentUserAccessService,
-                                authSessionService),
+                                authSessionService,
+                                errorResponseWriter),
                         UsernamePasswordAuthenticationFilter.class)
                 .formLogin(flc -> flc.disable())
                 .httpBasic(httpBasic -> httpBasic.disable())

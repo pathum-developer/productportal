@@ -24,6 +24,19 @@ public final class CorrelationIdContext {
     }
 
     public static String resolveOrCreate(HttpServletRequest request) {
+        Object requestAttribute = request.getAttribute(REQUEST_ATTRIBUTE);
+        if (requestAttribute instanceof String correlationId) {
+            Optional<String> normalizedCorrelationId = normalize(correlationId);
+            if (normalizedCorrelationId.isPresent()) {
+                return normalizedCorrelationId.get();
+            }
+        }
+
+        Optional<String> mdcCorrelationId = normalize(MDC.get(MDC_KEY));
+        if (mdcCorrelationId.isPresent()) {
+            return mdcCorrelationId.get();
+        }
+
         return normalize(request.getHeader(HEADER_NAME))
                 .orElseGet(CorrelationIdContext::createCorrelationId);
     }

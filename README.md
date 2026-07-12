@@ -228,6 +228,64 @@ com.elvencode.productportal
    - API base URL: `http://localhost:8080`
    - Swagger UI: `http://localhost:8080/swagger-ui.html`
 
+### Common Startup Failures
+
+#### CORS origin policy is missing
+
+If startup fails with:
+
+```text
+Failed to bind properties under 'security.cors' to com.elvencode.productportal.security.config.CorsProperties
+Reason: java.lang.IllegalArgumentException: security.cors.allowed-origins or security.cors.allowed-origin-patterns must be configured
+```
+
+configure at least one exact frontend origin before starting the application.
+
+PowerShell:
+
+```powershell
+$env:SECURITY_CORS_ALLOWED_ORIGINS="http://localhost:5173"
+$env:JWT_SECRET="replace-with-a-64-plus-character-secret-from-your-secret-manager"
+.\mvnw.cmd spring-boot:run
+```
+
+Bash:
+
+```bash
+export SECURITY_CORS_ALLOWED_ORIGINS="http://localhost:5173"
+export JWT_SECRET="replace-with-a-64-plus-character-secret-from-your-secret-manager"
+./mvnw spring-boot:run
+```
+
+IntelliJ IDEA:
+
+```text
+Run -> Edit Configurations -> ProductportalApplication -> Environment variables
+
+JWT_SECRET=replace-with-a-64-plus-character-secret-from-your-secret-manager
+SECURITY_CORS_ALLOWED_ORIGINS=http://localhost:5173
+```
+
+For production, set the real frontend origin:
+
+```bash
+export SECURITY_CORS_ALLOWED_ORIGINS="https://portal.example.com"
+```
+
+Do not use `*` while `security.cors.allow-credentials=true`. Credentialed browser requests require explicit origins or safe origin patterns.
+
+#### JWT secret is missing or too weak
+
+If startup fails because `jwt.secret` cannot be bound or validated, set `JWT_SECRET` outside source control. It must contain at least 64 UTF-8 bytes.
+
+PowerShell generator:
+
+```powershell
+$bytes = New-Object byte[] 64
+[Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes)
+$env:JWT_SECRET = [Convert]::ToBase64String($bytes)
+```
+
 ---
 
 ## 📡 API Endpoints
