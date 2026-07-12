@@ -3,6 +3,7 @@ package com.elvencode.productportal.security;
 import com.elvencode.productportal.auth.config.AuthenticationProtectionProperties;
 import com.elvencode.productportal.auth.session.config.AuthenticationSessionProperties;
 import com.elvencode.productportal.auth.session.service.AuthSessionService;
+import com.elvencode.productportal.security.config.CorsProperties;
 import com.elvencode.productportal.security.config.JwtProperties;
 import com.elvencode.productportal.security.filter.JwtTokenValidatorFilter;
 import com.elvencode.productportal.security.service.CurrentUserAccessService;
@@ -26,8 +27,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 @Configuration
@@ -35,7 +34,8 @@ import java.util.List;
 @EnableConfigurationProperties({
         JwtProperties.class,
         AuthenticationProtectionProperties.class,
-        AuthenticationSessionProperties.class
+        AuthenticationSessionProperties.class,
+        CorsProperties.class
 })
 @RequiredArgsConstructor
 public class ProductPortalSecurityConfig {
@@ -49,6 +49,7 @@ public class ProductPortalSecurityConfig {
     private final JwtUtil jwtUtil;
     private final CurrentUserAccessService currentUserAccessService;
     private final AuthSessionService authSessionService;
+    private final CorsProperties corsProperties;
 
     @Bean
     SecurityFilterChain customSecurityFilterChain(HttpSecurity http) {
@@ -76,11 +77,13 @@ public class ProductPortalSecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
-        config.setAllowedMethods(Collections.singletonList("*"));
-        config.setAllowedHeaders(Collections.singletonList("*"));
-        config.setAllowCredentials(true);
-        config.setMaxAge(3600L);
+        config.setAllowedOrigins(corsProperties.allowedOrigins());
+        config.setAllowedOriginPatterns(corsProperties.allowedOriginPatterns());
+        config.setAllowedMethods(corsProperties.allowedMethods());
+        config.setAllowedHeaders(corsProperties.allowedHeaders());
+        config.setExposedHeaders(corsProperties.exposedHeaders());
+        config.setAllowCredentials(corsProperties.allowCredentials());
+        config.setMaxAge(corsProperties.maxAge().toSeconds());
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);

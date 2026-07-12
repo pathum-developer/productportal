@@ -201,18 +201,30 @@ com.elvencode.productportal
      5. Add `JWT_SECRET=your-64-plus-character-secret`
      6. Apply and run
 
-4. **Start MySQL (via Docker Compose):**
+4. **Configure CORS origins:**
+   - `SECURITY_CORS_ALLOWED_ORIGINS` is required.
+   - Use exact origins only. For local frontend development:
+     ```powershell
+     $env:SECURITY_CORS_ALLOWED_ORIGINS="http://localhost:5173"
+     ```
+   - For production:
+     ```bash
+     export SECURITY_CORS_ALLOWED_ORIGINS="https://portal.example.com"
+     ```
+   - Multiple origins can be comma-separated.
+
+5. **Start MySQL (via Docker Compose):**
    ```bash
    docker-compose up -d
    ```
 
-5. **Build and run:**
+6. **Build and run:**
    ```bash
    mvn clean install
    mvn spring-boot:run
    ```
 
-6. **Verify startup:**
+7. **Verify startup:**
    - API base URL: `http://localhost:8080`
    - Swagger UI: `http://localhost:8080/swagger-ui.html`
 
