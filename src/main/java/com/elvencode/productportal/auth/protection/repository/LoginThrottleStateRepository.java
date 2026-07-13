@@ -17,7 +17,7 @@ public interface LoginThrottleStateRepository extends JpaRepository<LoginThrottl
     @Query(value = """
             INSERT INTO pp_t_login_throttle_state (scope, identifier_value)
             VALUES (:scope, :identifier)
-            ON DUPLICATE KEY UPDATE throttle_state_id = throttle_state_id
+            ON CONFLICT (scope, identifier_value) DO NOTHING
             """, nativeQuery = true)
     int insertIfAbsent(
             @Param("scope") String scope,

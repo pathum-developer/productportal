@@ -1,15 +1,26 @@
+﻿-- PostgreSQL seed data for Product Portal.
+
+-- Managed by Flyway after schema and triggers are available.
+
+
+
 -- Seed data is ordered by foreign-key dependencies. Run productportal-schema.sql before this file.
+
 -- Authentication protection tables are intentionally not seeded:
+
 -- pp_t_login_throttle_state and pp_a_login_attempt are runtime security tables populated by login attempts.
 
-INSERT IGNORE INTO pp_m_role
+
+
+INSERT INTO pp_m_role
     (role_code, display_name, description, sort_order)
 VALUES
     ('BUYER', 'Buyer', 'Customer account that can browse and purchase products.', 1),
     ('SELLER', 'Seller', 'Merchant account that can manage seller-owned catalog data.', 2),
-    ('ADMIN', 'Admin', 'Administrative account with elevated product portal privileges.', 3);
+    ('ADMIN', 'Admin', 'Administrative account with elevated product portal privileges.', 3)
+ON CONFLICT DO NOTHING;
 
-INSERT IGNORE INTO pp_m_permission
+INSERT INTO pp_m_permission
     (permission_code, display_name, description, resource_code, action_code, sort_order)
 VALUES
     ('PROFILE_READ', 'Read Profile', 'View own user profile details.', 'PROFILE', 'READ', 1),
@@ -35,17 +46,19 @@ VALUES
     ('ROLE_ASSIGN', 'Assign Roles', 'Assign roles to users.', 'ROLE', 'ASSIGN', 21),
     ('ROLE_MANAGE', 'Manage Roles', 'Create, update, and deactivate roles.', 'ROLE', 'MANAGE', 22),
     ('PERMISSION_READ', 'Read Permissions', 'View permission definitions.', 'PERMISSION', 'READ', 23),
-    ('PERMISSION_MANAGE', 'Manage Permissions', 'Create, update, and deactivate permissions.', 'PERMISSION', 'MANAGE', 24);
+    ('PERMISSION_MANAGE', 'Manage Permissions', 'Create, update, and deactivate permissions.', 'PERMISSION', 'MANAGE', 24)
+ON CONFLICT DO NOTHING;
 
-INSERT IGNORE INTO pp_r_permission_scope
+INSERT INTO pp_r_permission_scope
     (scope_code, display_name, description, sort_order)
 VALUES
     ('SELF', 'Self', 'Permission applies only to the current user account or profile.', 1),
     ('OWNED', 'Owned Resource', 'Permission applies only to resources owned by the current user.', 2),
     ('ORGANIZATION', 'Organization', 'Permission applies to resources inside the selected organization.', 3),
-    ('GLOBAL', 'Global', 'Permission applies across all organizations in the platform.', 4);
+    ('GLOBAL', 'Global', 'Permission applies across all organizations in the platform.', 4)
+ON CONFLICT DO NOTHING;
 
-INSERT IGNORE INTO pp_t_role_permission_grant
+INSERT INTO pp_t_role_permission_grant
     (role_code, permission_code, scope_code)
 VALUES
     ('BUYER', 'PROFILE_READ', 'SELF'),
@@ -85,54 +98,60 @@ VALUES
     ('ADMIN', 'ROLE_ASSIGN', 'ORGANIZATION'),
     ('ADMIN', 'ROLE_MANAGE', 'ORGANIZATION'),
     ('ADMIN', 'PERMISSION_READ', 'ORGANIZATION'),
-    ('ADMIN', 'PERMISSION_MANAGE', 'ORGANIZATION');
+    ('ADMIN', 'PERMISSION_MANAGE', 'ORGANIZATION')
+ON CONFLICT DO NOTHING;
 
-INSERT IGNORE INTO pp_r_user_status
+INSERT INTO pp_r_user_status
     (status_code, display_name, description, sort_order)
 VALUES
     ('ACTIVE', 'Active', 'User can authenticate and use permitted product portal features.', 1),
     ('INACTIVE', 'Inactive', 'User account is retained but cannot authenticate.', 2),
     ('SUSPENDED', 'Suspended', 'User account is temporarily blocked due to policy or risk.', 3),
-    ('DELETED', 'Deleted', 'User account is logically removed and retained only for audit history.', 4);
+    ('DELETED', 'Deleted', 'User account is logically removed and retained only for audit history.', 4)
+ON CONFLICT DO NOTHING;
 
-INSERT IGNORE INTO pp_r_membership_status
+INSERT INTO pp_r_membership_status
     (status_code, display_name, description, sort_order)
 VALUES
     ('INVITED', 'Invited', 'User has been invited to the organization but has not joined yet.', 1),
     ('ACTIVE', 'Active', 'User is an active member of the organization.', 2),
     ('SUSPENDED', 'Suspended', 'User membership is temporarily blocked in the organization.', 3),
     ('LEFT', 'Left', 'User left the organization voluntarily.', 4),
-    ('REMOVED', 'Removed', 'User was removed from the organization.', 5);
+    ('REMOVED', 'Removed', 'User was removed from the organization.', 5)
+ON CONFLICT DO NOTHING;
 
 INSERT INTO pp_m_organization
     (organization_id, organization_code, display_name, legal_name, description, created_by)
 VALUES
     (1, 'DEFAULT', 'Default Organization', 'Product Portal',
      'Default organization for existing single-tenant product portal data.', 'SYSTEM')
-ON DUPLICATE KEY UPDATE
-    display_name = VALUES(display_name),
-    legal_name = VALUES(legal_name),
-    description = VALUES(description),
+ON CONFLICT (organization_id) DO UPDATE SET
+display_name = EXCLUDED.display_name,
+    legal_name = EXCLUDED.legal_name,
+    description = EXCLUDED.description,
     updated_by = 'SYSTEM';
 
-INSERT IGNORE INTO pp_r_category_status
+INSERT INTO pp_r_category_status
     (status_code, display_name, description, sort_order)
 VALUES
     ('ACTIVE', 'Active', 'Category is visible and available for product assignment.', 1),
-    ('INACTIVE', 'Inactive', 'Category is retained but hidden from active catalog flows.', 2);
+    ('INACTIVE', 'Inactive', 'Category is retained but hidden from active catalog flows.', 2)
+ON CONFLICT DO NOTHING;
 
-INSERT IGNORE INTO pp_r_brand_status
+INSERT INTO pp_r_brand_status
     (status_code, display_name, description, sort_order)
 VALUES
     ('ACTIVE', 'Active', 'Brand is visible and available for product assignment.', 1),
-    ('INACTIVE', 'Inactive', 'Brand is retained but hidden from active catalog flows.', 2);
+    ('INACTIVE', 'Inactive', 'Brand is retained but hidden from active catalog flows.', 2)
+ON CONFLICT DO NOTHING;
 
-INSERT IGNORE INTO pp_r_product_status
+INSERT INTO pp_r_product_status
     (status_code, display_name, description, sort_order)
 VALUES
     ('DRAFT', 'Draft', 'Product is incomplete and not visible in active catalog flows.', 1),
     ('ACTIVE', 'Active', 'Product is visible and available in active catalog flows.', 2),
-    ('INACTIVE', 'Inactive', 'Product is retained but hidden from active catalog flows.', 3);
+    ('INACTIVE', 'Inactive', 'Product is retained but hidden from active catalog flows.', 3)
+ON CONFLICT DO NOTHING;
 
 INSERT INTO pp_m_user
     (user_id, username, full_name, email, phone_number, password_hash, status, primary_organization_id, created_by)
@@ -153,12 +172,12 @@ VALUES
      '$2a$10$yRBq307PNlU2EZPcG3B7Gev8XQ6zCjPktI.9H720f4QiRA.yu53o2', 'SUSPENDED', 1, 'SYSTEM'),
     (5008, 'anjali.rathnayake', 'Anjali Rathnayake', 'anjali.rathnayake@example.com', '+94771110008',
      '$2a$10$yRBq307PNlU2EZPcG3B7Gev8XQ6zCjPktI.9H720f4QiRA.yu53o2', 'DELETED', 1, 'SYSTEM')
-ON DUPLICATE KEY UPDATE
-    username = VALUES(username),
-    full_name = VALUES(full_name),
-    phone_number = VALUES(phone_number),
-    status = VALUES(status),
-    primary_organization_id = VALUES(primary_organization_id),
+ON CONFLICT (user_id) DO UPDATE SET
+username = EXCLUDED.username,
+    full_name = EXCLUDED.full_name,
+    phone_number = EXCLUDED.phone_number,
+    status = EXCLUDED.status,
+    primary_organization_id = EXCLUDED.primary_organization_id,
     updated_by = 'SYSTEM';
 
 INSERT INTO pp_t_user_organization_membership
@@ -172,13 +191,13 @@ VALUES
     (5006, 1, 'ACTIVE', TRUE, CURRENT_TIMESTAMP(6), 'SYSTEM'),
     (5007, 1, 'SUSPENDED', TRUE, CURRENT_TIMESTAMP(6), 'SYSTEM'),
     (5008, 1, 'REMOVED', TRUE, CURRENT_TIMESTAMP(6), 'SYSTEM')
-ON DUPLICATE KEY UPDATE
-    membership_status = VALUES(membership_status),
-    is_primary = VALUES(is_primary),
-    joined_at = VALUES(joined_at),
+ON CONFLICT (user_id, organization_id) DO UPDATE SET
+membership_status = EXCLUDED.membership_status,
+    is_primary = EXCLUDED.is_primary,
+    joined_at = EXCLUDED.joined_at,
     updated_by = 'SYSTEM';
 
-INSERT IGNORE INTO pp_t_user_role_assignment
+INSERT INTO pp_t_user_role_assignment
     (user_id, organization_id, role_code)
 VALUES
     (5001, 1, 'BUYER'),
@@ -188,7 +207,8 @@ VALUES
     (5005, 1, 'ADMIN'),
     (5006, 1, 'BUYER'),
     (5007, 1, 'SELLER'),
-    (5008, 1, 'BUYER');
+    (5008, 1, 'BUYER')
+ON CONFLICT DO NOTHING;
 
 INSERT INTO pp_m_user_address
     (address_id, user_id, recipient_name, phone_number, address_line_1, address_line_2, city, district,
@@ -212,17 +232,17 @@ VALUES
      'Matara', 'Southern', '81000', 'Sri Lanka', TRUE, 'SYSTEM'),
     (6009, 5001, 'Amal Perera', '+94771110001', 'No 75, Station Road', NULL, 'Moratuwa',
      'Colombo', 'Western', '10400', 'Sri Lanka', FALSE, 'SYSTEM')
-ON DUPLICATE KEY UPDATE
-    recipient_name = VALUES(recipient_name),
-    phone_number = VALUES(phone_number),
-    address_line_1 = VALUES(address_line_1),
-    address_line_2 = VALUES(address_line_2),
-    city = VALUES(city),
-    district = VALUES(district),
-    province = VALUES(province),
-    postal_code = VALUES(postal_code),
-    country = VALUES(country),
-    is_default = VALUES(is_default),
+ON CONFLICT (address_id) DO UPDATE SET
+recipient_name = EXCLUDED.recipient_name,
+    phone_number = EXCLUDED.phone_number,
+    address_line_1 = EXCLUDED.address_line_1,
+    address_line_2 = EXCLUDED.address_line_2,
+    city = EXCLUDED.city,
+    district = EXCLUDED.district,
+    province = EXCLUDED.province,
+    postal_code = EXCLUDED.postal_code,
+    country = EXCLUDED.country,
+    is_default = EXCLUDED.is_default,
     updated_by = 'SYSTEM';
 
 INSERT INTO pp_m_category
@@ -233,11 +253,11 @@ VALUES
     (1003, NULL, 'Fashion', 'fashion', 'ACTIVE', 3, 'SYSTEM'),
     (1004, NULL, 'Sports and Outdoors', 'sports-and-outdoors', 'ACTIVE', 4, 'SYSTEM'),
     (1005, NULL, 'Health and Beauty', 'health-and-beauty', 'ACTIVE', 5, 'SYSTEM')
-ON DUPLICATE KEY UPDATE
-    parent_category_id = VALUES(parent_category_id),
-    name = VALUES(name),
-    status_code = VALUES(status_code),
-    sort_order = VALUES(sort_order),
+ON CONFLICT (category_id) DO UPDATE SET
+parent_category_id = EXCLUDED.parent_category_id,
+    name = EXCLUDED.name,
+    status_code = EXCLUDED.status_code,
+    sort_order = EXCLUDED.sort_order,
     updated_by = 'SYSTEM';
 
 INSERT INTO pp_m_category
@@ -253,11 +273,11 @@ VALUES
     (1013, 1004, 'Fitness Equipment', 'fitness-equipment', 'ACTIVE', 1, 'SYSTEM'),
     (1014, 1004, 'Camping Gear', 'camping-gear', 'ACTIVE', 2, 'SYSTEM'),
     (1015, 1005, 'Skin Care', 'skin-care', 'INACTIVE', 1, 'SYSTEM')
-ON DUPLICATE KEY UPDATE
-    parent_category_id = VALUES(parent_category_id),
-    name = VALUES(name),
-    status_code = VALUES(status_code),
-    sort_order = VALUES(sort_order),
+ON CONFLICT (category_id) DO UPDATE SET
+parent_category_id = EXCLUDED.parent_category_id,
+    name = EXCLUDED.name,
+    status_code = EXCLUDED.status_code,
+    sort_order = EXCLUDED.sort_order,
     updated_by = 'SYSTEM';
 
 INSERT INTO pp_m_brand
@@ -278,11 +298,11 @@ VALUES
     (2013, 'Lenovo', 'lenovo', 'Computing devices and accessories.', 'https://cdn.productportal.local/brands/lenovo.png', 'ACTIVE', 'SYSTEM'),
     (2014, 'Revlon', 'revlon', 'Beauty and personal care products.', 'https://cdn.productportal.local/brands/revlon.png', 'INACTIVE', 'SYSTEM'),
     (2015, 'Under Armour', 'under-armour', 'Sportswear and performance products.', 'https://cdn.productportal.local/brands/under-armour.png', 'ACTIVE', 'SYSTEM')
-ON DUPLICATE KEY UPDATE
-    name = VALUES(name),
-    description = VALUES(description),
-    logo_url = VALUES(logo_url),
-    status_code = VALUES(status_code),
+ON CONFLICT (brand_id) DO UPDATE SET
+name = EXCLUDED.name,
+    description = EXCLUDED.description,
+    logo_url = EXCLUDED.logo_url,
+    status_code = EXCLUDED.status_code,
     updated_by = 'SYSTEM';
 
 INSERT INTO pp_m_product
@@ -303,15 +323,22 @@ VALUES
     (3013, 1, 5004, 1013, 2006, 'Nike Resistance Band Set', 'nike-resistance-band-set', 'Resistance bands for home workouts.', 'NRB-SET', 'SKU-NIKE-BAND01', 'DRAFT', 'SYSTEM'),
     (3014, 1, 5004, 1014, 2011, 'The North Face Trail Tent 2P', 'the-north-face-trail-tent-2p', 'Two-person tent for lightweight camping.', 'TNF-TENT-2P', 'SKU-TNF-TENT2P', 'ACTIVE', 'SYSTEM'),
     (3015, 1, 5004, 1015, 2014, 'Revlon Hydrating Face Serum', 'revlon-hydrating-face-serum', 'Hydrating serum for daily skin care routines.', 'RV-SERUM-HY', 'SKU-REV-SER01', 'INACTIVE', 'SYSTEM')
-ON DUPLICATE KEY UPDATE
-    organization_id = VALUES(organization_id),
-    owner_user_id = VALUES(owner_user_id),
-    category_id = VALUES(category_id),
-    brand_id = VALUES(brand_id),
-    name = VALUES(name),
-    description = VALUES(description),
-    model_number = VALUES(model_number),
-    sku_code = VALUES(sku_code),
-    status_code = VALUES(status_code),
+ON CONFLICT (product_id) DO UPDATE SET
+organization_id = EXCLUDED.organization_id,
+    owner_user_id = EXCLUDED.owner_user_id,
+    category_id = EXCLUDED.category_id,
+    brand_id = EXCLUDED.brand_id,
+    name = EXCLUDED.name,
+    description = EXCLUDED.description,
+    model_number = EXCLUDED.model_number,
+    sku_code = EXCLUDED.sku_code,
+    status_code = EXCLUDED.status_code,
     updated_by = 'SYSTEM';
 
+-- Explicit seed IDs do not advance PostgreSQL identity sequences. Reset them after seeding.
+SELECT setval(pg_get_serial_sequence('pp_m_organization', 'organization_id'), GREATEST((SELECT COALESCE(MAX(organization_id), 1) FROM pp_m_organization), 1), TRUE);
+SELECT setval(pg_get_serial_sequence('pp_m_user', 'user_id'), GREATEST((SELECT COALESCE(MAX(user_id), 1) FROM pp_m_user), 1), TRUE);
+SELECT setval(pg_get_serial_sequence('pp_m_user_address', 'address_id'), GREATEST((SELECT COALESCE(MAX(address_id), 1) FROM pp_m_user_address), 1), TRUE);
+SELECT setval(pg_get_serial_sequence('pp_m_category', 'category_id'), GREATEST((SELECT COALESCE(MAX(category_id), 1) FROM pp_m_category), 1), TRUE);
+SELECT setval(pg_get_serial_sequence('pp_m_brand', 'brand_id'), GREATEST((SELECT COALESCE(MAX(brand_id), 1) FROM pp_m_brand), 1), TRUE);
+SELECT setval(pg_get_serial_sequence('pp_m_product', 'product_id'), GREATEST((SELECT COALESCE(MAX(product_id), 1) FROM pp_m_product), 1), TRUE);

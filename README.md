@@ -36,7 +36,8 @@ Product Portal is a comprehensive backend solution for managing users, products,
 | **Framework** | Spring Boot | 4.1.0 |
 | **Language** | Java | 25 |
 | **Build Tool** | Maven | 3.9+ |
-| **Database** | MySQL | 8.0+ |
+| **Database** | PostgreSQL | 17 |
+| **Database Migration** | Flyway | Managed by Spring Boot |
 | **Security** | Spring Security + JWT | 0.13.0 |
 | **API Docs** | Springdoc OpenAPI | 2.8.14 |
 | **Validation** | Jakarta Bean Validation | 3.0+ |
@@ -141,11 +142,11 @@ com.elvencode.productportal
 # Required
 - Java 25+
 - Maven 3.9+
-- MySQL 8.0+
+- PostgreSQL 17+
 - Git
 
 # Optional
-- Docker & Docker Compose (for MySQL containerization)
+- Docker & Docker Compose (for PostgreSQL containerization)
 - Postman (for API testing)
 ```
 
@@ -159,16 +160,18 @@ com.elvencode.productportal
 
 2. **Configure database:**
    - Edit `src/main/resources/application.yml` or `application.properties`
-   - Set MySQL connection details:
+   - Set PostgreSQL connection details:
      ```yaml
      spring:
        datasource:
-         url: jdbc:mysql://localhost:3306/productportal
-         username: root
+         url: jdbc:postgresql://localhost:5432/productportal
+         username: productportal
          password: your_password
        jpa:
          hibernate:
-           ddl-auto: validate  # or 'update' for dev
+           ddl-auto: validate
+       flyway:
+         enabled: true
      ```
 
 3. **Configure JWT signing:**
@@ -213,7 +216,7 @@ com.elvencode.productportal
      ```
    - Multiple origins can be comma-separated.
 
-5. **Start MySQL (via Docker Compose):**
+5. **Start PostgreSQL (via Docker Compose):**
    ```bash
    docker-compose up -d
    ```

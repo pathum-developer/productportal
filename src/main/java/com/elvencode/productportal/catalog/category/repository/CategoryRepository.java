@@ -23,7 +23,7 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
             WITH RECURSIVE category_tree (category_id, path) AS (
                 SELECT
                     category_id,
-                    CAST(category_id AS CHAR(4000)) AS path
+                    ARRAY[category_id] AS path
                 FROM pp_m_category
                 WHERE category_id = :categoryId
 
@@ -31,11 +31,11 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 
                 SELECT
                     category.category_id,
-                    CONCAT(tree.path, ',', category.category_id)
+                    tree.path || category.category_id
                 FROM pp_m_category category
                 INNER JOIN category_tree tree
                     ON category.parent_category_id = tree.category_id
-                WHERE FIND_IN_SET(category.category_id, tree.path) = 0
+                WHERE NOT category.category_id = ANY(tree.path)
             )
             SELECT category_id
             FROM category_tree

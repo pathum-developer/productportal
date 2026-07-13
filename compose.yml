@@ -1,11 +1,15 @@
 services:
   dbservice:
-    image: mysql:latest
-    container_name: productportaldb
+    image: postgres:17-alpine
+    container_name: productportal-postgres
     ports:
-      - "3307:3306"
+      - "5432:5432"
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: productportal
+      POSTGRES_DB: productportal
+      POSTGRES_USER: productportal
+      POSTGRES_PASSWORD: productportal
     volumes:
-      - C:\Learn spring\productportal\mysql-data:/var/lib/mysql
+      - postgres-data:/var/lib/postgresql/data
+
+volumes:
+  postgres-data:
