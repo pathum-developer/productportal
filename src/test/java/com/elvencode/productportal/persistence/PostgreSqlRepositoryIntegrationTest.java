@@ -4,7 +4,6 @@ import com.elvencode.productportal.auth.protection.entity.LoginThrottleScope;
 import com.elvencode.productportal.auth.protection.repository.LoginThrottleStateRepository;
 import com.elvencode.productportal.catalog.category.repository.CategoryRepository;
 import com.elvencode.productportal.common.audit.AuditorAwareImpl;
-import com.elvencode.productportal.common.config.FlywayMigrationConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
@@ -17,8 +16,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DataJpaTest
-@Import({FlywayMigrationConfig.class, AuditorAwareImpl.class})
+@DataJpaTest(properties = "spring.liquibase.contexts=reference,demo")
+@Import(AuditorAwareImpl.class)
 @Testcontainers
 class PostgreSqlRepositoryIntegrationTest {
 

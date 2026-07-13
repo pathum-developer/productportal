@@ -1,7 +1,7 @@
 # MySQL to PostgreSQL Production Cutover Plan
 
 This document covers the production data cutover. Application code, PostgreSQL schema,
-trigger migrations, and seed migrations are handled by Flyway in `src/main/resources/db/migration`.
+trigger migrations, and seed migrations are handled by Liquibase in `src/main/resources/db/changelog`.
 
 ## Preconditions
 
@@ -48,14 +48,18 @@ mysqldump \
 1. Provision PostgreSQL.
 2. Create the application database and user.
 3. Apply least-privilege access.
-4. Run the application once or run Flyway directly so schema version reaches `3`.
+4. Run the application once so Liquibase applies every changelog entry.
 5. Confirm migration state:
 
 ```sql
-SELECT version, description, success
-FROM flyway_schema_history
-ORDER BY installed_rank;
+SELECT id, author, filename, exectype
+FROM databasechangelog
+ORDER BY dateexecuted, orderexecuted;
 ```
+
+If the PostgreSQL database was already initialized by Flyway, complete the
+[Flyway to Liquibase handover](flyway-to-liquibase-handover.md) before starting
+this application version.
 
 ## Phase 3: Data Export and Transform
 
@@ -78,7 +82,7 @@ Validate the following MySQL-to-PostgreSQL differences:
 ## Phase 4: Import
 
 1. Import business data into PostgreSQL.
-2. Do not overwrite Flyway metadata.
+2. Do not overwrite Liquibase metadata.
 3. Disable application traffic during import.
 4. Reset identity sequences after import.
 
@@ -118,7 +122,7 @@ Validate:
 2. Start the application.
 3. Confirm startup logs show:
    - PostgreSQL JDBC URL.
-   - Flyway schema up to date.
+   - Liquibase changelog is up to date.
    - Hibernate validation successful.
 4. Run smoke tests.
 5. Enable traffic gradually if infrastructure supports it.

@@ -37,7 +37,7 @@ Product Portal is a comprehensive backend solution for managing users, products,
 | **Language** | Java | 25 |
 | **Build Tool** | Maven | 3.9+ |
 | **Database** | PostgreSQL | 17 |
-| **Database Migration** | Flyway | Managed by Spring Boot |
+| **Database Migration** | Liquibase | Managed by Spring Boot |
 | **Security** | Spring Security + JWT | 0.13.0 |
 | **API Docs** | Springdoc OpenAPI | 2.8.14 |
 | **Validation** | Jakarta Bean Validation | 3.0+ |
@@ -170,8 +170,9 @@ com.elvencode.productportal
        jpa:
          hibernate:
            ddl-auto: validate
-       flyway:
+       liquibase:
          enabled: true
+         change-log: classpath:db/changelog/db.changelog-master.yaml
      ```
 
 3. **Configure JWT signing:**
