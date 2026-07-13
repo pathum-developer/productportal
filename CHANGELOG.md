@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- PostgreSQL runtime support with PostgreSQL JDBC driver
+- Flyway PostgreSQL schema, trigger, and seed migrations
 - Two-query fetch-join pagination pattern for scalable user listing
 - Custom multi-column sorting with SQL injection prevention
 - Sort parameter validation via UserSortColumn enum
@@ -19,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Professional README and contributing guides
 
 ### Changed
+- Migrated default datasource configuration and Docker Compose database from MySQL to PostgreSQL
+- Converted MySQL-specific native queries to PostgreSQL-compatible SQL
 - User pagination endpoint now accepts Pageable parameters
 - Repository query refactored to support dynamic sorting
 - Service layer includes sort validation
