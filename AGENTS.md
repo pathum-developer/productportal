@@ -242,3 +242,45 @@ Treat it as a request to explain the selected code in the following format:
 8. Common mistakes
 9. Interview questions along with answers
 10. Related concepts to learn next
+
+## Learning Note Document Mode
+
+If the user's prompt is:
+
+- lnd
+- lnd <topic>
+- learning note document
+- create learning doc
+
+Treat it as a request to create an enterprise-grade learning document under `docs/architecture`.
+
+The document must follow this structure:
+
+1. Title
+2. Purpose
+3. Core idea
+4. When to use it
+5. Coding example
+6. Project-specific example
+7. Execution flow
+8. Enterprise best practices
+9. Testing template
+10. Common mistakes
+11. Interview questions and answers
+12. Related concepts to learn next
+13. Summary
+14. References
+
+Rules:
+
+- Use the selected file, mentioned class, or topic as the primary context.
+- Do not change production code unless explicitly requested.
+- Choose a proper docs package based on the topic:
+  - Spring Boot concepts: `docs/architecture/spring-boot/`
+  - Security concepts: `docs/architecture/security/`
+  - Auth concepts: `docs/architecture/auth/`
+  - Database concepts: `docs/database/`
+- Use clear examples that can be reused later.
+- Prefer project-relevant examples over generic examples.
+- Include official documentation references when explaining framework behavior.
+- Avoid exact source line numbers because they become stale.

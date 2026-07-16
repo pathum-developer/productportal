@@ -1,0 +1,683 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="6380" viewBox="0 0 1800 6380" role="img" aria-labelledby="title desc">
+  <title id="title">AuthController.login() function-to-code execution map</title>
+  <desc id="desc">Strict execution-order diagram for Product Portal login, including startup configuration, runtime method calls, database touchpoints, alternate paths, and complete failure branches from cause through HTTP response.</desc>
+
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#1e293b"/>
+    </marker>
+    <marker id="arrow-red" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#b91c1c"/>
+    </marker>
+    <marker id="arrow-amber" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#b45309"/>
+    </marker>
+    <style>
+      .page { fill: #f8fafc; }
+      .title { font: 700 32px "Segoe UI", Arial, sans-serif; fill: #0f172a; }
+      .subtitle { font: 400 15px "Segoe UI", Arial, sans-serif; fill: #475569; }
+      .lane { fill: #e2e8f0; opacity: .55; }
+      .laneTitle { font: 700 15px "Segoe UI", Arial, sans-serif; fill: #0f172a; letter-spacing: .25px; }
+      .box { fill: #ffffff; stroke: #94a3b8; stroke-width: 1.6; rx: 16; }
+      .setup { fill: #f1f5f9; stroke: #64748b; stroke-width: 1.8; rx: 16; }
+      .runtime { fill: #ecfeff; stroke: #0891b2; stroke-width: 2; rx: 16; }
+      .service { fill: #eff6ff; stroke: #2563eb; stroke-width: 1.8; rx: 16; }
+      .provider { fill: #f5f3ff; stroke: #7c3aed; stroke-width: 1.8; rx: 16; }
+      .db { fill: #f0fdf4; stroke: #16a34a; stroke-width: 1.8; rx: 16; }
+      .fail { fill: #fff1f2; stroke: #e11d48; stroke-width: 1.8; rx: 16; }
+      .failEffect { fill: #fff7ed; stroke: #f97316; stroke-width: 1.8; rx: 16; }
+      .failTerminal { fill: #ffe4e6; stroke: #be123c; stroke-width: 2; rx: 16; }
+      .alternate { fill: #fffbeb; stroke: #d97706; stroke-width: 1.8; rx: 16; }
+      .decision { fill: #fefce8; stroke: #ca8a04; stroke-width: 1.9; }
+      .trigger { fill: #f8fafc; stroke: #64748b; stroke-width: 1.6; stroke-dasharray: 8 6; rx: 16; }
+      .panel { fill: #ffffff; stroke: #64748b; stroke-width: 2; rx: 20; }
+      .panelHeader { fill: #e2e8f0; stroke: #94a3b8; stroke-width: 1.2; rx: 10; }
+      .h1 { font: 700 15px "Segoe UI", Arial, sans-serif; fill: #0f172a; }
+      .h2 { font: 600 13px "Segoe UI", Arial, sans-serif; fill: #1e293b; }
+      .small { font: 12px "Segoe UI", Arial, sans-serif; fill: #334155; }
+      .tiny { font: 11px "Segoe UI", Arial, sans-serif; fill: #475569; }
+      .label { font: 700 12px "Segoe UI", Arial, sans-serif; fill: #334155; }
+      .ok { font: 700 12px "Segoe UI", Arial, sans-serif; fill: #047857; }
+      .bad { font: 700 12px "Segoe UI", Arial, sans-serif; fill: #b91c1c; }
+      .line { stroke: #1e293b; stroke-width: 1.9; fill: none; marker-end: url(#arrow); }
+      .lineRed { stroke: #b91c1c; stroke-width: 1.9; fill: none; marker-end: url(#arrow-red); }
+      .lineRedDash { stroke: #b91c1c; stroke-width: 1.8; fill: none; stroke-dasharray: 7 5; marker-end: url(#arrow-red); }
+      .lineAlt { stroke: #b45309; stroke-width: 1.9; fill: none; marker-end: url(#arrow-amber); }
+      .lineDash { stroke: #64748b; stroke-width: 1.6; fill: none; stroke-dasharray: 6 5; marker-end: url(#arrow); }
+    </style>
+  </defs>
+
+  <rect class="page" x="0" y="0" width="1800" height="6380"/>
+  <text class="title" x="900" y="45" text-anchor="middle">AuthController.login() - Function-to-Code Execution Order</text>
+  <text class="subtitle" x="900" y="74" text-anchor="middle">Top-to-bottom success order. Red nodes terminate, amber nodes are alternates, green nodes are DB touchpoints, and the lower matrix expands every failure.</text>
+
+  <rect class="lane" x="45" y="110" width="390" height="4080" rx="18"/>
+  <rect class="lane" x="485" y="110" width="610" height="4080" rx="18"/>
+  <rect class="lane" x="1145" y="110" width="610" height="4080" rx="18"/>
+  <text class="laneTitle" x="240" y="138" text-anchor="middle">Branch / Exit Paths</text>
+  <text class="laneTitle" x="790" y="138" text-anchor="middle">Strict Method Execution Order</text>
+  <text class="laneTitle" x="1450" y="138" text-anchor="middle">DB / Trigger Touchpoints</text>
+
+  <!-- Legend -->
+  <rect class="box" x="70" y="165" width="340" height="190"/>
+  <text class="h1" x="240" y="191" text-anchor="middle">Legend</text>
+  <rect class="setup" x="95" y="210" width="24" height="16"/>
+  <text class="tiny" x="133" y="223">startup/configuration method</text>
+  <rect class="service" x="95" y="235" width="24" height="16"/>
+  <text class="tiny" x="133" y="248">application service/controller method</text>
+  <rect class="provider" x="95" y="260" width="24" height="16"/>
+  <text class="tiny" x="133" y="273">Spring Security/provider method</text>
+  <rect class="db" x="95" y="285" width="24" height="16"/>
+  <text class="tiny" x="133" y="298">database access/write</text>
+  <rect class="fail" x="95" y="310" width="24" height="16"/>
+  <text class="tiny" x="133" y="323">terminal failure branch</text>
+  <rect class="alternate" x="95" y="335" width="24" height="16"/>
+  <text class="tiny" x="133" y="348">alternate branch that may rejoin</text>
+
+  <!-- Startup setup -->
+  <rect class="setup" x="545" y="165" width="490" height="126"/>
+  <text class="h1" x="790" y="191" text-anchor="middle">0A. Startup only: build SecurityFilterChain</text>
+  <text class="h2" x="790" y="216" text-anchor="middle">ProductPortalSecurityConfig.customSecurityFilterChain()</text>
+  <text class="small" x="790" y="239" text-anchor="middle">Registers permitAll/authenticated rules and JwtTokenValidatorFilter</text>
+  <text class="tiny" x="790" y="260" text-anchor="middle">ProductPortalSecurityConfig.customSecurityFilterChain()</text>
+  <text class="tiny" x="790" y="279" text-anchor="middle">Not invoked per login request; the built filter chain is used at runtime.</text>
+
+  <rect class="setup" x="545" y="335" width="490" height="104"/>
+  <text class="h1" x="790" y="361" text-anchor="middle">0B. Startup only: support beans</text>
+  <text class="small" x="790" y="385" text-anchor="middle">ProductportalApplication scans @ConfigurationProperties classes</text>
+  <text class="small" x="790" y="406" text-anchor="middle">SecurityPathProperties validates permitAll, jwtBypass, authenticated</text>
+  <text class="tiny" x="790" y="427" text-anchor="middle">Validates path groups before ProviderManager + BCryptPasswordEncoder are used.</text>
+
+  <path class="line" d="M790 291 L790 335"/>
+
+  <!-- Runtime start -->
+  <rect class="runtime" x="545" y="500" width="490" height="90"/>
+  <text class="h1" x="790" y="526" text-anchor="middle">1. POST /api/auth/login enters runtime filter chain</text>
+  <text class="small" x="790" y="550" text-anchor="middle">CorrelationIdFilter.doFilterInternal() → resolveOrCreate()</text>
+  <text class="tiny" x="790" y="571" text-anchor="middle">Then the prebuilt SecurityFilterChain evaluates jwtBypass and authorization matchers</text>
+
+  <path class="line" d="M790 439 L790 500"/>
+
+  <polygon class="decision" points="790,630 995,700 790,770 585,700"/>
+  <text class="h1" x="790" y="685" text-anchor="middle">2. Does request bypass JWT validation?</text>
+  <text class="small" x="790" y="709" text-anchor="middle">JwtTokenValidatorFilter.shouldNotFilter()</text>
+  <text class="tiny" x="790" y="730" text-anchor="middle">JwtTokenValidatorFilter.shouldNotFilter(); /api/auth/login matches jwtBypass</text>
+
+  <rect class="alternate" x="80" y="642" width="330" height="116"/>
+  <text class="h1" x="245" y="668" text-anchor="middle">A0 — Non-login secured request</text>
+  <text class="small" x="245" y="692" text-anchor="middle">JwtTokenValidatorFilter.doFilterInternal()</text>
+  <text class="tiny" x="245" y="713" text-anchor="middle">resolveBearerToken():93, parseSignedClaims():55</text>
+  <text class="tiny" x="245" y="732" text-anchor="middle">Not executed for JWT-bypass login endpoint.</text>
+
+  <path class="line" d="M790 590 L790 630"/>
+  <path class="lineAlt" d="M585 700 L410 700"/>
+  <text class="label" x="465" y="684">NO — alternate path</text>
+
+  <rect class="runtime" x="545" y="820" width="490" height="84"/>
+  <text class="h1" x="790" y="846" text-anchor="middle">3. JWT validator skipped for login</text>
+  <text class="small" x="790" y="870" text-anchor="middle">permitAll matcher authorizes anonymous access; request proceeds to Spring MVC</text>
+  <text class="tiny" x="790" y="891" text-anchor="middle">UsernamePasswordAuthenticationFilter does not process this endpoint; form login is disabled</text>
+
+  <path class="line" d="M790 770 L790 820"/>
+  <text class="ok" x="820" y="794">YES</text>
+
+  <!-- Validation -->
+  <polygon class="decision" points="790,950 995,1020 790,1090 585,1020"/>
+  <text class="h1" x="790" y="1005" text-anchor="middle">4. Does LoginRequest pass @Valid?</text>
+  <text class="small" x="790" y="1029" text-anchor="middle">username/password Bean Validation</text>
+  <text class="tiny" x="790" y="1050" text-anchor="middle">LoginRequest.java:7-17</text>
+
+  <rect class="fail" x="80" y="956" width="330" height="128"/>
+  <text class="h1" x="245" y="982" text-anchor="middle">F1 — Request validation failure</text>
+  <text class="small" x="245" y="1006" text-anchor="middle">GlobalExceptionHandler.handleException()</text>
+  <text class="tiny" x="245" y="1027" text-anchor="middle">MethodArgumentNotValidException</text>
+  <text class="tiny" x="245" y="1046" text-anchor="middle">Detailed cause → response flow: F1 matrix row below</text>
+  <text class="bad" x="245" y="1068" text-anchor="middle">HTTP 400</text>
+
+  <path class="line" d="M790 904 L790 950"/>
+  <path class="lineRed" d="M585 1020 L410 1020"/>
+  <text class="bad" x="465" y="1004">NO</text>
+
+  <!-- AOP and controller -->
+  <rect class="service" x="545" y="1140" width="490" height="104"/>
+  <text class="h1" x="790" y="1166" text-anchor="middle">5. AOP wraps controller/service execution</text>
+  <text class="small" x="790" y="1190" text-anchor="middle">LoggingAndPerformanceAspect.logAndMeasureExecutionTime()</text>
+  <text class="tiny" x="790" y="1211" text-anchor="middle">LoggingAndPerformanceAspect.java:47</text>
+  <text class="tiny" x="790" y="1230" text-anchor="middle">Optional local trace: AuthControllerExecutionLoggingAspect.java:50, 66</text>
+
+  <path class="line" d="M790 1090 L790 1140"/>
+  <text class="ok" x="820" y="1115">YES</text>
+
+  <rect class="service" x="545" y="1290" width="490" height="110"/>
+  <text class="h1" x="790" y="1316" text-anchor="middle">6. AuthController.login()</text>
+  <text class="small" x="790" y="1340" text-anchor="middle">metadataResolver.resolve(httpRequest)</text>
+  <text class="small" x="790" y="1361" text-anchor="middle">authService.login(request, metadata)</text>
+  <text class="tiny" x="790" y="1382" text-anchor="middle">AuthController.java:65-71</text>
+
+  <path class="line" d="M790 1244 L790 1290"/>
+
+  <!-- Metadata -->
+  <rect class="service" x="545" y="1450" width="490" height="142"/>
+  <text class="h1" x="790" y="1476" text-anchor="middle">7. Resolve login metadata</text>
+  <text class="small" x="790" y="1500" text-anchor="middle">LoginRequestMetadataResolver.resolve():25</text>
+  <text class="small" x="790" y="1521" text-anchor="middle">resolveClientIp():31 -> forwarded headers or remoteAddr</text>
+  <text class="tiny" x="790" y="1542" text-anchor="middle">resolveForwardedClientIp():42, extractForwardedFor():57</text>
+  <text class="tiny" x="790" y="1561" text-anchor="middle">firstHeaderValue():86, truncate():94, LoginRequestMetadata ctor:10</text>
+  <text class="tiny" x="790" y="1580" text-anchor="middle">Junction: trustForwardedHeaders true uses Forwarded/X-Forwarded-For/X-Real-IP.</text>
+
+  <path class="line" d="M790 1400 L790 1450"/>
+
+  <!-- AuthService -->
+  <rect class="service" x="545" y="1640" width="490" height="118"/>
+  <text class="h1" x="790" y="1666" text-anchor="middle">8. AuthServiceImpl.login()</text>
+  <text class="small" x="790" y="1690" text-anchor="middle">normalizeUsername():106</text>
+  <text class="small" x="790" y="1711" text-anchor="middle">Create UsernamePasswordAuthenticationToken, set metadata details</text>
+  <text class="small" x="790" y="1732" text-anchor="middle">authenticationManager.authenticate(authenticationRequest)</text>
+  <text class="tiny" x="790" y="1749" text-anchor="middle">AuthServiceImpl.java:38-46</text>
+
+  <path class="line" d="M790 1592 L790 1640"/>
+
+  <!-- Provider -->
+  <rect class="provider" x="545" y="1810" width="490" height="118"/>
+  <text class="h1" x="790" y="1836" text-anchor="middle">9. ProviderManager selects and invokes custom provider</text>
+  <text class="small" x="790" y="1860" text-anchor="middle">supports():72 → authenticate():38 → resolveMetadata():76</text>
+  <text class="small" x="790" y="1881" text-anchor="middle">loginProtectionService.assertLoginAllowed(username, metadata)</text>
+  <text class="tiny" x="790" y="1902" text-anchor="middle">ProductPortalUsernamePwdAuthenticationProvider.java:38-46</text>
+
+  <path class="line" d="M790 1758 L790 1810"/>
+
+  <!-- Throttle -->
+  <polygon class="decision" points="790,1980 995,2050 790,2120 585,2050"/>
+  <text class="h1" x="790" y="2028" text-anchor="middle">10. Login allowed?</text>
+  <text class="small" x="790" y="2052" text-anchor="middle">LoginProtectionServiceImpl.assertLoginAllowed():36</text>
+  <text class="tiny" x="790" y="2073" text-anchor="middle">findActiveBlock():136 -> LoginThrottleState.isLocked():99</text>
+
+  <rect class="fail" x="80" y="1968" width="330" height="156"/>
+  <text class="h1" x="245" y="1994" text-anchor="middle">F2 — Blocked by IP/username throttle</text>
+  <text class="small" x="245" y="2018" text-anchor="middle">recordBlockedAttempt():123</text>
+  <text class="small" x="245" y="2039" text-anchor="middle">audit():154 -> LoginAttemptAudit.create():94</text>
+  <text class="small" x="245" y="2060" text-anchor="middle">LoginAttemptAuditRepository.save():14</text>
+  <text class="tiny" x="245" y="2081" text-anchor="middle">Detailed audit → handler flow: F2 matrix row below</text>
+  <text class="bad" x="245" y="2104" text-anchor="middle">HTTP 429 + Retry-After</text>
+
+  <rect class="db" x="1205" y="1988" width="490" height="126"/>
+  <text class="h1" x="1450" y="2014" text-anchor="middle">DB read: throttle state</text>
+  <text class="small" x="1450" y="2038" text-anchor="middle">pp_t_login_throttle_state</text>
+  <text class="tiny" x="1450" y="2059" text-anchor="middle">findByScopeAndIdentifier():26</text>
+  <text class="tiny" x="1450" y="2078" text-anchor="middle">Checks IP_ADDRESS and USERNAME rows</text>
+  <text class="tiny" x="1450" y="2097" text-anchor="middle">No DB trigger attached to this table</text>
+
+  <path class="line" d="M790 1928 L790 1980"/>
+  <path class="lineRed" d="M585 2050 L410 2050"/>
+  <path class="lineDash" d="M995 2050 L1205 2050"/>
+  <text class="bad" x="465" y="2034">NO</text>
+
+  <!-- User lookup -->
+  <polygon class="decision" points="790,2170 995,2240 790,2310 585,2240"/>
+  <text class="h1" x="790" y="2218" text-anchor="middle">11. User found?</text>
+  <text class="small" x="790" y="2242" text-anchor="middle">UserRepository.findByUsername():34</text>
+  <text class="tiny" x="790" y="2263" text-anchor="middle">Provider.java:50</text>
+
+  <rect class="fail" x="80" y="2168" width="330" height="142"/>
+  <text class="h1" x="245" y="2194" text-anchor="middle">F3 — Unknown username</text>
+  <text class="small" x="245" y="2218" text-anchor="middle">passwordEncoder.matches(dummy hash)</text>
+  <text class="small" x="245" y="2239" text-anchor="middle">recordBadCredentials():65</text>
+  <text class="small" x="245" y="2260" text-anchor="middle">Detailed throttle + audit flow: F3 matrix row below</text>
+  <text class="bad" x="245" y="2283" text-anchor="middle">BadCredentialsException -> HTTP 401</text>
+
+  <rect class="db" x="1205" y="2182" width="490" height="116"/>
+  <text class="h1" x="1450" y="2208" text-anchor="middle">DB read: user account</text>
+  <text class="small" x="1450" y="2232" text-anchor="middle">pp_m_user with entity graph</text>
+  <text class="tiny" x="1450" y="2253" text-anchor="middle">status, primaryOrganization, memberships, roleAssignments</text>
+  <text class="tiny" x="1450" y="2272" text-anchor="middle">No login trigger; read only</text>
+
+  <path class="line" d="M790 2120 L790 2170"/>
+  <text class="ok" x="820" y="2145">YES</text>
+  <path class="lineRed" d="M585 2240 L410 2240"/>
+  <path class="lineDash" d="M995 2240 L1205 2240"/>
+  <text class="bad" x="465" y="2224">NO</text>
+
+  <!-- Password -->
+  <polygon class="decision" points="790,2360 995,2430 790,2500 585,2430"/>
+  <text class="h1" x="790" y="2408" text-anchor="middle">12. Password matches?</text>
+  <text class="small" x="790" y="2432" text-anchor="middle">passwordEncoder.matches(password, portalUser.getPasswordHash())</text>
+  <text class="tiny" x="790" y="2453" text-anchor="middle">ProductPortalUsernamePwdAuthenticationProvider.java:57</text>
+
+  <rect class="fail" x="80" y="2372" width="330" height="118"/>
+  <text class="h1" x="245" y="2398" text-anchor="middle">F4 — Password mismatch</text>
+  <text class="small" x="245" y="2422" text-anchor="middle">recordBadCredentials():65</text>
+  <text class="small" x="245" y="2443" text-anchor="middle">Detailed throttle + audit flow: F4 matrix row below</text>
+  <text class="bad" x="245" y="2466" text-anchor="middle">BadCredentialsException -> HTTP 401</text>
+
+  <rect class="db" x="1205" y="2368" width="490" height="140"/>
+  <text class="h1" x="1450" y="2394" text-anchor="middle">DB write on bad credentials</text>
+  <text class="small" x="1450" y="2418" text-anchor="middle">pp_t_login_throttle_state insert/update</text>
+  <text class="tiny" x="1450" y="2439" text-anchor="middle">insertIfAbsent():22, findByScopeAndIdentifierForUpdate():37</text>
+  <text class="tiny" x="1450" y="2458" text-anchor="middle">pp_a_login_attempt INSERT via save():14</text>
+  <text class="tiny" x="1450" y="2477" text-anchor="middle">No DB trigger attached to either login table</text>
+
+  <path class="line" d="M790 2310 L790 2360"/>
+  <text class="ok" x="820" y="2335">YES</text>
+  <path class="lineRed" d="M585 2430 L410 2430"/>
+  <path class="lineDash" d="M995 2430 L1205 2438"/>
+  <text class="bad" x="465" y="2414">NO</text>
+
+  <!-- Access context -->
+  <rect class="provider" x="545" y="2550" width="490" height="118"/>
+  <text class="h1" x="790" y="2576" text-anchor="middle">13. Build authentication context</text>
+  <text class="small" x="790" y="2600" text-anchor="middle">buildAuthenticationContext():84</text>
+  <text class="small" x="790" y="2621" text-anchor="middle">CurrentUserAccessServiceImpl.buildContext():50</text>
+  <text class="tiny" x="790" y="2642" text-anchor="middle">Provider catches CurrentUserAccessDeniedException and records security failure</text>
+
+  <path class="line" d="M790 2500 L790 2550"/>
+  <text class="ok" x="820" y="2525">YES</text>
+
+  <polygon class="decision" points="790,2720 995,2790 790,2860 585,2790"/>
+  <text class="h1" x="790" y="2768" text-anchor="middle">14. Account active?</text>
+  <text class="small" x="790" y="2792" text-anchor="middle">canAccountAuthenticate():81</text>
+  <text class="tiny" x="790" y="2813" text-anchor="middle">Requires statusCode ACTIVE and status.active true</text>
+
+  <rect class="fail" x="80" y="2716" width="330" height="142"/>
+  <text class="h1" x="245" y="2742" text-anchor="middle">F5 — Account disabled</text>
+  <text class="small" x="245" y="2766" text-anchor="middle">recordSecurityFailure():113</text>
+  <text class="small" x="245" y="2787" text-anchor="middle">outcome ACCOUNT_DISABLED</text>
+  <text class="tiny" x="245" y="2808" text-anchor="middle">Detailed security-audit flow: F5 matrix row below</text>
+  <text class="bad" x="245" y="2831" text-anchor="middle">DisabledException -> HTTP 401</text>
+
+  <path class="line" d="M790 2668 L790 2720"/>
+  <path class="lineRed" d="M585 2790 L410 2790"/>
+  <text class="bad" x="465" y="2774">NO</text>
+
+  <polygon class="decision" points="790,2910 995,2980 790,3050 585,2980"/>
+  <text class="h1" x="790" y="2958" text-anchor="middle">15. Active role assignment exists?</text>
+  <text class="small" x="790" y="2982" text-anchor="middle">loadActiveRoleAssignments():86</text>
+  <text class="tiny" x="790" y="3003" text-anchor="middle">UserRoleAssignmentRepository.findByUser_IdAndActiveTrue():13</text>
+
+  <rect class="fail" x="80" y="2916" width="330" height="128"/>
+  <text class="h1" x="245" y="2942" text-anchor="middle">F6 — No active role assignment</text>
+  <text class="small" x="245" y="2966" text-anchor="middle">recordSecurityFailure():113</text>
+  <text class="small" x="245" y="2987" text-anchor="middle">Detailed security-audit flow: F6 matrix row below</text>
+  <text class="bad" x="245" y="3010" text-anchor="middle">DisabledException -> HTTP 401</text>
+
+  <rect class="db" x="1205" y="2896" width="490" height="170"/>
+  <text class="h1" x="1450" y="2922" text-anchor="middle">DB read: RBAC context</text>
+  <text class="small" x="1450" y="2946" text-anchor="middle">pp_t_user_role_assignment read</text>
+  <text class="small" x="1450" y="2967" text-anchor="middle">pp_t_role_permission_grant read</text>
+  <text class="tiny" x="1450" y="2988" text-anchor="middle">findByUser_IdAndActiveTrue():13</text>
+  <text class="tiny" x="1450" y="3007" text-anchor="middle">findByRole_RoleCodeInAndActiveTrue():17</text>
+  <text class="tiny" x="1450" y="3026" text-anchor="middle">Login reads these tables only. RBAC audit triggers do not fire.</text>
+  <text class="tiny" x="1450" y="3045" text-anchor="middle">isCurrentlyActive(): UserRoleAssignment.java:154, RolePermissionGrant.java:101</text>
+
+  <path class="line" d="M790 2860 L790 2910"/>
+  <text class="ok" x="820" y="2885">YES</text>
+  <path class="lineRed" d="M585 2980 L410 2980"/>
+  <path class="lineDash" d="M995 2980 L1205 2981"/>
+  <text class="bad" x="465" y="2964">NO</text>
+
+  <rect class="provider" x="545" y="3100" width="490" height="136"/>
+  <text class="h1" x="790" y="3126" text-anchor="middle">16. Resolve permissions and authorities</text>
+  <text class="small" x="790" y="3150" text-anchor="middle">extractRoleCodes():98, loadPermissionCodes():105</text>
+  <text class="small" x="790" y="3171" text-anchor="middle">resolvePrimaryOrganizationId():117, buildAuthorities():126</text>
+  <text class="small" x="790" y="3192" text-anchor="middle">toRoleAuthority():141, toPermissionAuthority():145</text>
+  <text class="tiny" x="790" y="3213" text-anchor="middle">Creates ProductPortalUserPrincipal + ProductPortalAuthenticationContext</text>
+
+  <path class="line" d="M790 3050 L790 3100"/>
+  <text class="ok" x="820" y="3075">YES</text>
+
+  <rect class="service" x="545" y="3285" width="490" height="126"/>
+  <text class="h1" x="790" y="3311" text-anchor="middle">17. Record successful login</text>
+  <text class="small" x="790" y="3335" text-anchor="middle">LoginProtectionServiceImpl.recordSuccessfulLogin():94</text>
+  <text class="small" x="790" y="3356" text-anchor="middle">recordSuccessfulUsernameLogin():122, recordSuccessfulIpLogin():129</text>
+  <text class="tiny" x="790" y="3377" text-anchor="middle">audit():154 → create():94 → save():14 → toAuthentication():19</text>
+
+  <rect class="db" x="1205" y="3285" width="490" height="126"/>
+  <text class="h1" x="1450" y="3311" text-anchor="middle">DB write: login success audit</text>
+  <text class="small" x="1450" y="3335" text-anchor="middle">pp_t_login_throttle_state update if rows exist</text>
+  <text class="small" x="1450" y="3356" text-anchor="middle">pp_a_login_attempt INSERT</text>
+  <text class="tiny" x="1450" y="3377" text-anchor="middle">AuditorAwareImpl.getCurrentAuditor():20 sets created_by</text>
+  <text class="tiny" x="1450" y="3396" text-anchor="middle">No DB trigger attached to these login tables</text>
+
+  <path class="line" d="M790 3236 L790 3285"/>
+  <path class="lineDash" d="M1035 3348 L1205 3348"/>
+
+  <!-- Session -->
+  <rect class="service" x="545" y="3460" width="490" height="142"/>
+  <text class="h1" x="790" y="3486" text-anchor="middle">18. Create durable auth session</text>
+  <text class="small" x="790" y="3510" text-anchor="middle">clock.instant() → calculateAccessTokenExpiresAt():68 → createSession():36</text>
+  <text class="small" x="790" y="3531" text-anchor="middle">userRepository.getReferenceById(), UUID.randomUUID()</text>
+  <text class="small" x="790" y="3552" text-anchor="middle">RefreshTokenCodec.generate():24 -> hashSecret():65</text>
+  <text class="tiny" x="790" y="3573" text-anchor="middle">AuthSession.create():99 -> updateClientMetadata():145</text>
+  <text class="tiny" x="790" y="3592" text-anchor="middle">AuthSessionRepository.save(session)</text>
+
+  <rect class="db" x="1205" y="3470" width="490" height="116"/>
+  <text class="h1" x="1450" y="3496" text-anchor="middle">DB write: auth session</text>
+  <text class="small" x="1450" y="3520" text-anchor="middle">pp_t_auth_session INSERT</text>
+  <text class="tiny" x="1450" y="3541" text-anchor="middle">stores refresh_token_hash, client_ip, user_agent</text>
+  <text class="tiny" x="1450" y="3560" text-anchor="middle">No DB trigger attached to this table</text>
+
+  <path class="line" d="M790 3411 L790 3460"/>
+  <path class="lineDash" d="M1035 3531 L1205 3528"/>
+
+  <polygon class="decision" points="790,3650 995,3720 790,3790 585,3720"/>
+  <text class="h1" x="790" y="3698" text-anchor="middle">19. Session limit exceeded?</text>
+  <text class="small" x="790" y="3722" text-anchor="middle">revokeSessionsBeyondLimit():129</text>
+  <text class="tiny" x="790" y="3743" text-anchor="middle">findActiveSessionsByUserId():44 then skip(maxActiveSessionsPerUser)</text>
+
+  <rect class="alternate" x="80" y="3670" width="330" height="98"/>
+  <text class="h1" x="245" y="3696" text-anchor="middle">A1 — Session cap exceeded</text>
+  <text class="small" x="245" y="3720" text-anchor="middle">AuthSession.revoke():136</text>
+  <text class="tiny" x="245" y="3741" text-anchor="middle">Revoke older sessions, then continue; this is not a login failure</text>
+
+  <rect class="db" x="1205" y="3658" width="490" height="124"/>
+  <text class="h1" x="1450" y="3684" text-anchor="middle">DB read/update: active sessions</text>
+  <text class="small" x="1450" y="3708" text-anchor="middle">pp_t_auth_session SELECT active sessions</text>
+  <text class="small" x="1450" y="3729" text-anchor="middle">possible UPDATE revoked_at/revocation_reason</text>
+  <text class="tiny" x="1450" y="3750" text-anchor="middle">No DB trigger attached to this table</text>
+
+  <path class="line" d="M790 3602 L790 3650"/>
+  <path class="lineAlt" d="M585 3720 L410 3720"/>
+  <path class="lineDash" d="M995 3720 L1205 3720"/>
+  <text class="label" x="465" y="3704">YES — alternate</text>
+  <path class="lineAlt" d="M410 3750 L470 3750 L470 3815 L790 3815 L790 3840"/>
+  <text class="label" x="535" y="3803">rejoin after revocation</text>
+
+  <!-- JWT and response -->
+  <rect class="service" x="545" y="3840" width="490" height="142"/>
+  <text class="h1" x="790" y="3866" text-anchor="middle">20. Generate access token and response</text>
+  <text class="small" x="790" y="3890" text-anchor="middle">JwtUtil.generateJwtToken(authentication, sessionId, issuedAt):34</text>
+  <text class="small" x="790" y="3911" text-anchor="middle">signingKey():40 → calculateAccessTokenExpiresAt():68 (second calculation)</text>
+  <text class="small" x="790" y="3932" text-anchor="middle">getAccessTokenValiditySeconds():64 → AccessContextResponse constructor</text>
+  <text class="tiny" x="790" y="3953" text-anchor="middle">getAccessTokenValiditySeconds():64; new LoginResponse(...):54-70</text>
+
+  <path class="line" d="M790 3790 L790 3840"/>
+  <text class="ok" x="820" y="3815">NO</text>
+
+  <rect class="runtime" x="545" y="4030" width="490" height="92"/>
+  <text class="h1" x="790" y="4056" text-anchor="middle">21. Return HTTP 200 LoginResponse</text>
+  <text class="small" x="790" y="4080" text-anchor="middle">ResponseEntity.ok().cacheControl(noStore)</text>
+  <text class="tiny" x="790" y="4101" text-anchor="middle">header(PRAGMA, no-cache).body(LoginResponse) - AuthController.java:67-71</text>
+
+  <path class="line" d="M790 3982 L790 4030"/>
+
+  <!-- Trigger summary -->
+  <rect class="trigger" x="1205" y="3890" width="490" height="202"/>
+  <text class="h1" x="1450" y="3916" text-anchor="middle">Database trigger status</text>
+  <text class="small" x="1450" y="3940" text-anchor="middle">Normal login does not fire PostgreSQL database triggers.</text>
+  <text class="tiny" x="1450" y="3961" text-anchor="middle">No trigger on pp_t_auth_session</text>
+  <text class="tiny" x="1450" y="3980" text-anchor="middle">No trigger on pp_a_login_attempt</text>
+  <text class="tiny" x="1450" y="3999" text-anchor="middle">No trigger on pp_t_login_throttle_state</text>
+  <text class="tiny" x="1450" y="4018" text-anchor="middle">Existing triggers are on RBAC/membership mutation tables only:</text>
+  <text class="tiny" x="1450" y="4037" text-anchor="middle">trg_pp_t_user_organization_membership_audit_fn():48</text>
+  <text class="tiny" x="1450" y="4056" text-anchor="middle">trg_pp_t_user_role_assignment_audit_fn():232</text>
+  <text class="tiny" x="1450" y="4075" text-anchor="middle">trg_pp_t_role_permission_grant_audit_fn():433</text>
+
+  <rect class="trigger" x="80" y="3880" width="330" height="190"/>
+  <text class="h1" x="245" y="3908" text-anchor="middle">F7 — Cross-cutting runtime failure</text>
+  <text class="small" x="245" y="3933" text-anchor="middle">Any uncaught Exception from steps 5–20</text>
+  <text class="tiny" x="245" y="3956" text-anchor="middle">AOP logs and rethrows; transactional outcome depends on failure point</text>
+  <text class="tiny" x="245" y="3979" text-anchor="middle">GlobalExceptionHandler.handleException(Exception)</text>
+  <text class="tiny" x="245" y="4002" text-anchor="middle">handleInternalServerError() → safe ErrorResponseDto</text>
+  <text class="bad" x="245" y="4032" text-anchor="middle">HTTP 500 + correlation ID</text>
+  <text class="tiny" x="245" y="4055" text-anchor="middle">Detailed transaction effects: F7 matrix row below</text>
+
+  <!-- Detailed failure branch matrix -->
+  <g id="failure-branch-matrix" role="group" aria-labelledby="failure-matrix-title">
+    <title id="failure-matrix-title">Detailed failure branch execution matrix</title>
+    <rect class="panel" x="45" y="4220" width="1710" height="2070"/>
+    <text class="title" x="900" y="4262" text-anchor="middle">Failure Branches — Cause to Terminal HTTP Response</text>
+    <text class="subtitle" x="900" y="4290" text-anchor="middle">Each row executes left to right. Red arrows are terminal failure paths; none rejoin the successful login flow.</text>
+
+    <rect class="panelHeader" x="70" y="4310" width="360" height="46"/>
+    <rect class="panelHeader" x="500" y="4310" width="360" height="46"/>
+    <rect class="panelHeader" x="930" y="4310" width="360" height="46"/>
+    <rect class="panelHeader" x="1360" y="4310" width="360" height="46"/>
+    <text class="laneTitle" x="250" y="4339" text-anchor="middle">1. Failure source / thrown condition</text>
+    <text class="laneTitle" x="680" y="4339" text-anchor="middle">2. Authored application actions</text>
+    <text class="laneTitle" x="1110" y="4339" text-anchor="middle">3. Persistence / transaction effects</text>
+    <text class="laneTitle" x="1540" y="4339" text-anchor="middle">4. Exception mapping / terminal result</text>
+
+    <!-- F1: DTO validation -->
+    <rect class="fail" x="70" y="4380" width="360" height="180"/>
+    <text class="h1" x="250" y="4410" text-anchor="middle">F1 — Invalid LoginRequest</text>
+    <text class="small" x="250" y="4438" text-anchor="middle">Spring MVC applies @Valid before controller invocation</text>
+    <text class="tiny" x="250" y="4463" text-anchor="middle">LoginRequest username/password constraint fails</text>
+    <text class="tiny" x="250" y="4487" text-anchor="middle">MethodArgumentNotValidException is raised</text>
+    <text class="tiny" x="250" y="4511" text-anchor="middle">AuthController.login() and authentication code never execute</text>
+
+    <rect class="fail" x="500" y="4380" width="360" height="180"/>
+    <text class="h1" x="680" y="4410" text-anchor="middle">Validation exception advice</text>
+    <text class="small" x="680" y="4438" text-anchor="middle">GlobalExceptionHandler.handleException(...)</text>
+    <text class="tiny" x="680" y="4463" text-anchor="middle">Reads BindingResult field errors</text>
+    <text class="tiny" x="680" y="4487" text-anchor="middle">Builds field → validation-message map</text>
+    <text class="tiny" x="680" y="4511" text-anchor="middle">buildBadRequestResponse() reuses the correlation ID</text>
+
+    <rect class="failEffect" x="930" y="4380" width="360" height="180"/>
+    <text class="h1" x="1110" y="4410" text-anchor="middle">No authentication side effects</text>
+    <text class="small" x="1110" y="4438" text-anchor="middle">No provider, throttle, audit, session, or JWT work</text>
+    <text class="tiny" x="1110" y="4463" text-anchor="middle">No login-related repository method is called</text>
+    <text class="tiny" x="1110" y="4487" text-anchor="middle">No login table is read or written</text>
+    <text class="tiny" x="1110" y="4511" text-anchor="middle">CorrelationIdFilter still completes its finally cleanup</text>
+
+    <rect class="failTerminal" x="1360" y="4380" width="360" height="180"/>
+    <text class="h1" x="1540" y="4410" text-anchor="middle">HTTP 400 — Bad Request</text>
+    <text class="small" x="1540" y="4438" text-anchor="middle">Validation error map returned to caller</text>
+    <text class="tiny" x="1540" y="4463" text-anchor="middle">X-Correlation-ID response header retained</text>
+    <text class="tiny" x="1540" y="4487" text-anchor="middle">No credential or token data is returned</text>
+    <text class="bad" x="1540" y="4520" text-anchor="middle">TERMINAL — controller not entered</text>
+
+    <path class="lineRed" d="M430 4470 L500 4470"/>
+    <path class="lineRed" d="M860 4470 L930 4470"/>
+    <path class="lineRed" d="M1290 4470 L1360 4470"/>
+
+    <!-- F2: active throttle block -->
+    <rect class="fail" x="70" y="4620" width="360" height="200"/>
+    <text class="h1" x="250" y="4650" text-anchor="middle">F2 — Active IP or username block</text>
+    <text class="small" x="250" y="4678" text-anchor="middle">assertLoginAllowed() → findActiveBlock()</text>
+    <text class="tiny" x="250" y="4703" text-anchor="middle">Checks IP_ADDRESS first, then USERNAME</text>
+    <text class="tiny" x="250" y="4727" text-anchor="middle">LoginThrottleState.isLocked(now) returns true</text>
+    <text class="tiny" x="250" y="4751" text-anchor="middle">LoginBlockedException carries outcome + retryAfter</text>
+
+    <rect class="fail" x="500" y="4620" width="360" height="200"/>
+    <text class="h1" x="680" y="4650" text-anchor="middle">Provider records the blocked attempt</text>
+    <text class="small" x="680" y="4678" text-anchor="middle">authenticate() catches LoginBlockedException</text>
+    <text class="tiny" x="680" y="4703" text-anchor="middle">recordBlockedAttempt() normalizes username/metadata</text>
+    <text class="tiny" x="680" y="4727" text-anchor="middle">audit() creates an immutable LoginAttemptAudit</text>
+    <text class="tiny" x="680" y="4751" text-anchor="middle">The original LoginBlockedException is rethrown</text>
+
+    <rect class="failEffect" x="930" y="4620" width="360" height="200"/>
+    <text class="h1" x="1110" y="4650" text-anchor="middle">Append-only security audit</text>
+    <text class="small" x="1110" y="4678" text-anchor="middle">LoginAttemptAuditRepository.save()</text>
+    <text class="tiny" x="1110" y="4703" text-anchor="middle">outcome = IP_THROTTLED or USERNAME_LOCKED</text>
+    <text class="tiny" x="1110" y="4727" text-anchor="middle">locked_until is copied into pp_a_login_attempt</text>
+    <text class="tiny" x="1110" y="4751" text-anchor="middle">JPA auditing supplies created_by = SYSTEM</text>
+    <text class="tiny" x="1110" y="4775" text-anchor="middle">Existing throttle counters are not incremented</text>
+
+    <rect class="failTerminal" x="1360" y="4620" width="360" height="200"/>
+    <text class="h1" x="1540" y="4650" text-anchor="middle">HTTP 429 — Too Many Requests</text>
+    <text class="small" x="1540" y="4678" text-anchor="middle">handleLoginBlockedException()</text>
+    <text class="tiny" x="1540" y="4703" text-anchor="middle">retryAfterSeconds(clock.instant())</text>
+    <text class="tiny" x="1540" y="4727" text-anchor="middle">Retry-After + X-Correlation-ID headers</text>
+    <text class="tiny" x="1540" y="4751" text-anchor="middle">Returns a generic throttling message</text>
+    <text class="bad" x="1540" y="4784" text-anchor="middle">TERMINAL — no password/RBAC/session/JWT work</text>
+
+    <path class="lineRed" d="M430 4720 L500 4720"/>
+    <path class="lineRed" d="M860 4720 L930 4720"/>
+    <path class="lineRed" d="M1290 4720 L1360 4720"/>
+
+    <!-- F3: unknown username -->
+    <rect class="fail" x="70" y="4880" width="360" height="200"/>
+    <text class="h1" x="250" y="4910" text-anchor="middle">F3 — Username not found</text>
+    <text class="small" x="250" y="4938" text-anchor="middle">UserRepository.findByUsername() returns empty</text>
+    <text class="tiny" x="250" y="4963" text-anchor="middle">BCrypt matches supplied password against dummy hash</text>
+    <text class="tiny" x="250" y="4987" text-anchor="middle">Equalizes password-hash work against enumeration</text>
+    <text class="tiny" x="250" y="5011" text-anchor="middle">recordBadCredentials(username, null, metadata)</text>
+
+    <rect class="fail" x="500" y="4880" width="360" height="200"/>
+    <text class="h1" x="680" y="4910" text-anchor="middle">Throttle username and client IP</text>
+    <text class="small" x="680" y="4938" text-anchor="middle">stateForUpdate(USERNAME) → recordFailure()</text>
+    <text class="tiny" x="680" y="4963" text-anchor="middle">stateForUpdate(IP_ADDRESS) → recordFailure()</text>
+    <text class="tiny" x="680" y="4987" text-anchor="middle">laterOf() selects the furthest lock deadline</text>
+    <text class="tiny" x="680" y="5011" text-anchor="middle">audit(..., BAD_CREDENTIALS, lockedUntil, now)</text>
+
+    <rect class="failEffect" x="930" y="4880" width="360" height="200"/>
+    <text class="h1" x="1110" y="4910" text-anchor="middle">Throttle update + audit insert</text>
+    <text class="small" x="1110" y="4938" text-anchor="middle">insertIfAbsent() then pessimistic row lock × 2</text>
+    <text class="tiny" x="1110" y="4963" text-anchor="middle">pp_t_login_throttle_state insert/update</text>
+    <text class="tiny" x="1110" y="4987" text-anchor="middle">pp_a_login_attempt INSERT, user_id = null</text>
+    <text class="tiny" x="1110" y="5011" text-anchor="middle">recordBadCredentials transaction commits before throw</text>
+
+    <rect class="failTerminal" x="1360" y="4880" width="360" height="200"/>
+    <text class="h1" x="1540" y="4910" text-anchor="middle">HTTP 401 — Unauthorized</text>
+    <text class="small" x="1540" y="4938" text-anchor="middle">Provider throws BadCredentialsException</text>
+    <text class="tiny" x="1540" y="4963" text-anchor="middle">handleAuthenticationException()</text>
+    <text class="tiny" x="1540" y="4987" text-anchor="middle">buildErrorResponse() + correlation ID</text>
+    <text class="tiny" x="1540" y="5011" text-anchor="middle">Generic “Invalid username or password” response</text>
+    <text class="bad" x="1540" y="5044" text-anchor="middle">TERMINAL — user existence remains undisclosed</text>
+
+    <path class="lineRed" d="M430 4980 L500 4980"/>
+    <path class="lineRed" d="M860 4980 L930 4980"/>
+    <path class="lineRed" d="M1290 4980 L1360 4980"/>
+
+    <!-- F4: password mismatch -->
+    <rect class="fail" x="70" y="5140" width="360" height="200"/>
+    <text class="h1" x="250" y="5170" text-anchor="middle">F4 — Password hash mismatch</text>
+    <text class="small" x="250" y="5198" text-anchor="middle">User exists and real BCrypt verification runs</text>
+    <text class="tiny" x="250" y="5223" text-anchor="middle">passwordEncoder.matches(...) returns false</text>
+    <text class="tiny" x="250" y="5247" text-anchor="middle">recordBadCredentials(username, userId, metadata)</text>
+    <text class="tiny" x="250" y="5271" text-anchor="middle">RBAC, session creation, and JWT signing are skipped</text>
+
+    <rect class="fail" x="500" y="5140" width="360" height="200"/>
+    <text class="h1" x="680" y="5170" text-anchor="middle">Throttle username and client IP</text>
+    <text class="small" x="680" y="5198" text-anchor="middle">stateForUpdate(USERNAME) → recordFailure()</text>
+    <text class="tiny" x="680" y="5223" text-anchor="middle">stateForUpdate(IP_ADDRESS) → recordFailure()</text>
+    <text class="tiny" x="680" y="5247" text-anchor="middle">Threshold crossing may establish locked_until</text>
+    <text class="tiny" x="680" y="5271" text-anchor="middle">audit(..., BAD_CREDENTIALS, lockedUntil, now)</text>
+
+    <rect class="failEffect" x="930" y="5140" width="360" height="200"/>
+    <text class="h1" x="1110" y="5170" text-anchor="middle">Throttle update + audit insert</text>
+    <text class="small" x="1110" y="5198" text-anchor="middle">Pessimistic updates serialize concurrent failures</text>
+    <text class="tiny" x="1110" y="5223" text-anchor="middle">pp_t_login_throttle_state insert/update</text>
+    <text class="tiny" x="1110" y="5247" text-anchor="middle">pp_a_login_attempt INSERT with real user_id</text>
+    <text class="tiny" x="1110" y="5271" text-anchor="middle">recordBadCredentials transaction commits before throw</text>
+
+    <rect class="failTerminal" x="1360" y="5140" width="360" height="200"/>
+    <text class="h1" x="1540" y="5170" text-anchor="middle">HTTP 401 — Unauthorized</text>
+    <text class="small" x="1540" y="5198" text-anchor="middle">Provider throws BadCredentialsException</text>
+    <text class="tiny" x="1540" y="5223" text-anchor="middle">handleAuthenticationException()</text>
+    <text class="tiny" x="1540" y="5247" text-anchor="middle">Same external response as an unknown username</text>
+    <text class="tiny" x="1540" y="5271" text-anchor="middle">No internal account details are disclosed</text>
+    <text class="bad" x="1540" y="5304" text-anchor="middle">TERMINAL — authentication rejected</text>
+
+    <path class="lineRed" d="M430 5240 L500 5240"/>
+    <path class="lineRed" d="M860 5240 L930 5240"/>
+    <path class="lineRed" d="M1290 5240 L1360 5240"/>
+
+    <!-- F5: disabled account -->
+    <rect class="fail" x="70" y="5400" width="360" height="200"/>
+    <text class="h1" x="250" y="5430" text-anchor="middle">F5 — Account cannot authenticate</text>
+    <text class="small" x="250" y="5458" text-anchor="middle">buildContext() → canAccountAuthenticate() = false</text>
+    <text class="tiny" x="250" y="5483" text-anchor="middle">Status must be ACTIVE and status.active must be true</text>
+    <text class="tiny" x="250" y="5507" text-anchor="middle">CurrentUserAccessDeniedException(ACCOUNT_DISABLED)</text>
+    <text class="tiny" x="250" y="5531" text-anchor="middle">Password was valid, but access context is rejected</text>
+
+    <rect class="fail" x="500" y="5400" width="360" height="200"/>
+    <text class="h1" x="680" y="5430" text-anchor="middle">Provider maps the security failure</text>
+    <text class="small" x="680" y="5458" text-anchor="middle">buildAuthenticationContext() catches the exception</text>
+    <text class="tiny" x="680" y="5483" text-anchor="middle">toLoginAttemptOutcome() → ACCOUNT_DISABLED</text>
+    <text class="tiny" x="680" y="5507" text-anchor="middle">recordSecurityFailure() writes the security audit</text>
+    <text class="tiny" x="680" y="5531" text-anchor="middle">Provider wraps the cause in DisabledException</text>
+
+    <rect class="failEffect" x="930" y="5400" width="360" height="200"/>
+    <text class="h1" x="1110" y="5430" text-anchor="middle">Security audit only</text>
+    <text class="small" x="1110" y="5458" text-anchor="middle">pp_a_login_attempt INSERT</text>
+    <text class="tiny" x="1110" y="5483" text-anchor="middle">outcome = ACCOUNT_DISABLED, user_id retained</text>
+    <text class="tiny" x="1110" y="5507" text-anchor="middle">No throttle failure counter is incremented</text>
+    <text class="tiny" x="1110" y="5531" text-anchor="middle">No auth session or token is created</text>
+
+    <rect class="failTerminal" x="1360" y="5400" width="360" height="200"/>
+    <text class="h1" x="1540" y="5430" text-anchor="middle">HTTP 401 — Unauthorized</text>
+    <text class="small" x="1540" y="5458" text-anchor="middle">handleAuthenticationException(DisabledException)</text>
+    <text class="tiny" x="1540" y="5483" text-anchor="middle">Returns the same generic credential message</text>
+    <text class="tiny" x="1540" y="5507" text-anchor="middle">External caller cannot infer account status</text>
+    <text class="bad" x="1540" y="5540" text-anchor="middle">TERMINAL — authenticated context not produced</text>
+
+    <path class="lineRed" d="M430 5500 L500 5500"/>
+    <path class="lineRed" d="M860 5500 L930 5500"/>
+    <path class="lineRed" d="M1290 5500 L1360 5500"/>
+
+    <!-- F6: no active role -->
+    <rect class="fail" x="70" y="5660" width="360" height="200"/>
+    <text class="h1" x="250" y="5690" text-anchor="middle">F6 — No currently active role</text>
+    <text class="small" x="250" y="5718" text-anchor="middle">loadActiveRoleAssignments() queries assignments</text>
+    <text class="tiny" x="250" y="5743" text-anchor="middle">isCurrentlyActive(now) filters role/membership/validity</text>
+    <text class="tiny" x="250" y="5767" text-anchor="middle">The resulting active-assignment list is empty</text>
+    <text class="tiny" x="250" y="5791" text-anchor="middle">CurrentUserAccessDeniedException(NO_ACTIVE_ROLE_ASSIGNMENT)</text>
+
+    <rect class="fail" x="500" y="5660" width="360" height="200"/>
+    <text class="h1" x="680" y="5690" text-anchor="middle">Provider maps the security failure</text>
+    <text class="small" x="680" y="5718" text-anchor="middle">buildAuthenticationContext() catches the exception</text>
+    <text class="tiny" x="680" y="5743" text-anchor="middle">toLoginAttemptOutcome() maps the reason</text>
+    <text class="tiny" x="680" y="5767" text-anchor="middle">recordSecurityFailure() writes the security audit</text>
+    <text class="tiny" x="680" y="5791" text-anchor="middle">Provider throws DisabledException</text>
+
+    <rect class="failEffect" x="930" y="5660" width="360" height="200"/>
+    <text class="h1" x="1110" y="5690" text-anchor="middle">RBAC reads + security audit</text>
+    <text class="small" x="1110" y="5718" text-anchor="middle">pp_t_user_role_assignment is read only</text>
+    <text class="tiny" x="1110" y="5743" text-anchor="middle">pp_a_login_attempt INSERT</text>
+    <text class="tiny" x="1110" y="5767" text-anchor="middle">outcome = NO_ACTIVE_ROLE_ASSIGNMENT</text>
+    <text class="tiny" x="1110" y="5791" text-anchor="middle">No RBAC DB trigger fires; no session/JWT is created</text>
+
+    <rect class="failTerminal" x="1360" y="5660" width="360" height="200"/>
+    <text class="h1" x="1540" y="5690" text-anchor="middle">HTTP 401 — Unauthorized</text>
+    <text class="small" x="1540" y="5718" text-anchor="middle">handleAuthenticationException(DisabledException)</text>
+    <text class="tiny" x="1540" y="5743" text-anchor="middle">Returns the generic credential message</text>
+    <text class="tiny" x="1540" y="5767" text-anchor="middle">Role-assignment details remain internal</text>
+    <text class="bad" x="1540" y="5800" text-anchor="middle">TERMINAL — authorization context unavailable</text>
+
+    <path class="lineRed" d="M430 5760 L500 5760"/>
+    <path class="lineRed" d="M860 5760 L930 5760"/>
+    <path class="lineRed" d="M1290 5760 L1360 5760"/>
+
+    <!-- F7: unexpected runtime exception -->
+    <rect class="fail" x="70" y="5920" width="360" height="240"/>
+    <text class="h1" x="250" y="5950" text-anchor="middle">F7 — Unexpected runtime exception</text>
+    <text class="small" x="250" y="5978" text-anchor="middle">Any uncaught failure from controller/service execution</text>
+    <text class="tiny" x="250" y="6003" text-anchor="middle">Examples: repository, transaction, access-context, session, or JWT failure</text>
+    <text class="tiny" x="250" y="6027" text-anchor="middle">LoggingAndPerformanceAspect logs and rethrows</text>
+    <text class="tiny" x="250" y="6051" text-anchor="middle">Optional login tracer also records the failed method</text>
+    <text class="tiny" x="250" y="6075" text-anchor="middle">Validation and known authentication exceptions use F1–F6</text>
+
+    <rect class="fail" x="500" y="5920" width="360" height="240"/>
+    <text class="h1" x="680" y="5950" text-anchor="middle">Transaction boundary determines rollback</text>
+    <text class="small" x="680" y="5978" text-anchor="middle">The currently failing @Transactional method rolls back</text>
+    <text class="tiny" x="680" y="6003" text-anchor="middle">AuthServiceImpl.login() has no encompassing transaction</text>
+    <text class="tiny" x="680" y="6027" text-anchor="middle">Previously committed service transactions remain committed</text>
+    <text class="tiny" x="680" y="6051" text-anchor="middle">Provider success audit commits before session creation</text>
+    <text class="tiny" x="680" y="6075" text-anchor="middle">Session transaction outcome depends on failure location</text>
+
+    <rect class="failEffect" x="930" y="5920" width="360" height="240"/>
+    <text class="h1" x="1110" y="5950" text-anchor="middle">Possible partial durable effects</text>
+    <text class="small" x="1110" y="5978" text-anchor="middle">Failure during createSession(): session transaction rolls back</text>
+    <text class="tiny" x="1110" y="6003" text-anchor="middle">Earlier SUCCESS login audit may already exist</text>
+    <text class="tiny" x="1110" y="6027" text-anchor="middle">Failure during JWT signing occurs after session commit</text>
+    <text class="tiny" x="1110" y="6051" text-anchor="middle">Then both SUCCESS audit and auth session may remain</text>
+    <text class="tiny" x="1110" y="6075" text-anchor="middle">No special generic-failure login audit is authored</text>
+
+    <rect class="failTerminal" x="1360" y="5920" width="360" height="240"/>
+    <text class="h1" x="1540" y="5950" text-anchor="middle">HTTP 500 — Internal Server Error</text>
+    <text class="small" x="1540" y="5978" text-anchor="middle">GlobalExceptionHandler.handleException(Exception)</text>
+    <text class="tiny" x="1540" y="6003" text-anchor="middle">handleInternalServerError() logs full server-side cause</text>
+    <text class="tiny" x="1540" y="6027" text-anchor="middle">buildErrorResponseDto() returns a safe generic message</text>
+    <text class="tiny" x="1540" y="6051" text-anchor="middle">X-Correlation-ID supports operational diagnosis</text>
+    <text class="tiny" x="1540" y="6075" text-anchor="middle">Credentials, tokens, and internals are not exposed</text>
+    <text class="bad" x="1540" y="6110" text-anchor="middle">TERMINAL — client receives no LoginResponse</text>
+
+    <path class="lineRed" d="M430 6040 L500 6040"/>
+    <path class="lineRed" d="M860 6040 L930 6040"/>
+    <path class="lineRed" d="M1290 6040 L1360 6040"/>
+
+    <text class="tiny" x="900" y="6220" text-anchor="middle">Repository signatures are authored contracts; Spring Data supplies their executable implementations. Lombok-generated and implicit record methods are intentionally omitted.</text>
+    <text class="tiny" x="900" y="6244" text-anchor="middle">A0 and A1 are amber alternate paths, not failures. F1–F7 are terminal and never rejoin the HTTP 200 path.</text>
+  </g>
+
+</svg>
