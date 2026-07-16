@@ -1,17 +1,13 @@
 package com.elvencode.productportal.security;
 
-import com.elvencode.productportal.auth.config.AuthenticationProtectionProperties;
-import com.elvencode.productportal.auth.session.config.AuthenticationSessionProperties;
 import com.elvencode.productportal.auth.session.service.AuthSessionService;
 import com.elvencode.productportal.common.web.HttpErrorResponseWriter;
 import com.elvencode.productportal.security.config.CorsProperties;
-import com.elvencode.productportal.security.config.JwtProperties;
+import com.elvencode.productportal.security.config.SecurityPathPolicy;
 import com.elvencode.productportal.security.filter.JwtTokenValidatorFilter;
 import com.elvencode.productportal.security.service.CurrentUserAccessService;
 import com.elvencode.productportal.security.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,24 +24,10 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.List;
-
 @Configuration
 @EnableWebSecurity
-@EnableConfigurationProperties({
-        JwtProperties.class,
-        AuthenticationProtectionProperties.class,
-        AuthenticationSessionProperties.class,
-        CorsProperties.class
-})
 @RequiredArgsConstructor
 public class ProductPortalSecurityConfig {
-
-    @Qualifier("publicPaths")
-    private final List<String> publicPaths;
-
-    @Qualifier("securedPaths")
-    private final List<String> securedPaths;
 
     private final JwtUtil jwtUtil;
     private final CurrentUserAccessService currentUserAccessService;
@@ -59,14 +41,16 @@ public class ProductPortalSecurityConfig {
                 .cors(corsConfig -> corsConfig.configurationSource(corsConfigurationSource()))
                 .sessionManagement(sessionConfig ->
                         sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                    .authorizeHttpRequests(requests -> {
-                        publicPaths.forEach(path -> requests.requestMatchers(path).permitAll());
-                        securedPaths.forEach(path -> requests.requestMatchers(path).authenticated());
-                        requests.anyRequest().denyAll();
-                    })
+                .authorizeHttpRequests(requests -> {
+                    SecurityPathPolicy.permitAll()
+                            .forEach(path -> requests.requestMatchers(path).permitAll());
+                    SecurityPathPolicy.authenticated()
+                            .forEach(path -> requests.requestMatchers(path).authenticated());
+                    requests.anyRequest().denyAll();
+                })
                 .addFilterBefore(
                         new JwtTokenValidatorFilter(
-                                publicPaths,
+                                SecurityPathPolicy.jwtBypass(),
                                 jwtUtil,
                                 currentUserAccessService,
                                 authSessionService,

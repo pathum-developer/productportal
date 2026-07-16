@@ -1,0 +1,399 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="4050" viewBox="0 0 1800 4050" role="img" aria-labelledby="title desc">
+  <title id="title">JwtTokenValidatorFilter function-to-code execution map</title>
+  <desc id="desc">Strict execution-order diagram for JWT request validation, including Spring filter registration, bypass handling, token and session validation, SecurityContext population, database touchpoints, and terminal error responses.</desc>
+
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#1e293b"/>
+    </marker>
+    <marker id="arrow-red" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#b91c1c"/>
+    </marker>
+    <marker id="arrow-amber" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#b45309"/>
+    </marker>
+    <style>
+      .page { fill: #f8fafc; }
+      .title { font: 700 32px "Segoe UI", Arial, sans-serif; fill: #0f172a; }
+      .subtitle { font: 400 15px "Segoe UI", Arial, sans-serif; fill: #475569; }
+      .lane { fill: #e2e8f0; opacity: .55; }
+      .laneTitle { font: 700 15px "Segoe UI", Arial, sans-serif; fill: #0f172a; letter-spacing: .25px; }
+      .box { fill: #ffffff; stroke: #94a3b8; stroke-width: 1.6; rx: 16; }
+      .setup { fill: #f1f5f9; stroke: #64748b; stroke-width: 1.8; rx: 16; }
+      .runtime { fill: #ecfeff; stroke: #0891b2; stroke-width: 2; rx: 16; }
+      .service { fill: #eff6ff; stroke: #2563eb; stroke-width: 1.8; rx: 16; }
+      .provider { fill: #f5f3ff; stroke: #7c3aed; stroke-width: 1.8; rx: 16; }
+      .db { fill: #f0fdf4; stroke: #16a34a; stroke-width: 1.8; rx: 16; }
+      .fail { fill: #fff1f2; stroke: #e11d48; stroke-width: 1.8; rx: 16; }
+      .alternate { fill: #fffbeb; stroke: #d97706; stroke-width: 1.8; rx: 16; }
+      .decision { fill: #fefce8; stroke: #ca8a04; stroke-width: 1.9; }
+      .trigger { fill: #f8fafc; stroke: #64748b; stroke-width: 1.6; stroke-dasharray: 8 6; rx: 16; }
+      .panel { fill: #ffffff; stroke: #64748b; stroke-width: 1.7; rx: 18; }
+      .panelHeader { fill: #e2e8f0; stroke: #64748b; stroke-width: 1.2; rx: 12; }
+      .h1 { font: 700 15px "Segoe UI", Arial, sans-serif; fill: #0f172a; }
+      .h2 { font: 600 13px "Segoe UI", Arial, sans-serif; fill: #1e293b; }
+      .small { font: 12px "Segoe UI", Arial, sans-serif; fill: #334155; }
+      .tiny { font: 11px "Segoe UI", Arial, sans-serif; fill: #475569; }
+      .code { font: 11px Consolas, "Courier New", monospace; fill: #334155; }
+      .label { font: 700 12px "Segoe UI", Arial, sans-serif; fill: #334155; }
+      .ok { font: 700 12px "Segoe UI", Arial, sans-serif; fill: #047857; }
+      .bad { font: 700 12px "Segoe UI", Arial, sans-serif; fill: #b91c1c; }
+      .warn { font: 700 12px "Segoe UI", Arial, sans-serif; fill: #b45309; }
+      .line { stroke: #1e293b; stroke-width: 1.9; fill: none; marker-end: url(#arrow); }
+      .lineRed { stroke: #b91c1c; stroke-width: 1.9; fill: none; marker-end: url(#arrow-red); }
+      .lineRedDash { stroke: #b91c1c; stroke-width: 1.7; fill: none; stroke-dasharray: 7 5; marker-end: url(#arrow-red); }
+      .lineDash { stroke: #64748b; stroke-width: 1.6; fill: none; stroke-dasharray: 6 5; marker-end: url(#arrow); }
+      .lineAlt { stroke: #b45309; stroke-width: 1.8; fill: none; stroke-dasharray: 7 5; marker-end: url(#arrow-amber); }
+      .divider { stroke: #cbd5e1; stroke-width: 1.2; }
+    </style>
+  </defs>
+
+  <rect class="page" x="0" y="0" width="1800" height="4050"/>
+  <text class="title" x="900" y="45" text-anchor="middle">JwtTokenValidatorFilter - Function-to-Code Execution Order</text>
+  <text class="subtitle" x="900" y="74" text-anchor="middle">Top-to-bottom order. Gray nodes run at startup. Blue and purple nodes run per request. Red nodes write a terminal response. Green nodes show persistence access.</text>
+
+  <rect class="lane" x="45" y="110" width="390" height="3820" rx="18"/>
+  <rect class="lane" x="485" y="110" width="610" height="3820" rx="18"/>
+  <rect class="lane" x="1145" y="110" width="610" height="3820" rx="18"/>
+  <text class="laneTitle" x="240" y="138" text-anchor="middle">Branch / Exit Paths</text>
+  <text class="laneTitle" x="790" y="138" text-anchor="middle">Strict Method Execution Order</text>
+  <text class="laneTitle" x="1450" y="138" text-anchor="middle">Configuration / Data / Framework</text>
+
+  <!-- Legend -->
+  <rect class="box" x="70" y="165" width="340" height="192"/>
+  <text class="h1" x="240" y="191" text-anchor="middle">Legend</text>
+  <rect class="setup" x="95" y="210" width="24" height="16"/>
+  <text class="tiny" x="133" y="223">startup configuration</text>
+  <rect class="runtime" x="95" y="237" width="24" height="16"/>
+  <text class="tiny" x="133" y="250">filter method running per request</text>
+  <rect class="provider" x="95" y="264" width="24" height="16"/>
+  <text class="tiny" x="133" y="277">Spring Security or token operation</text>
+  <rect class="db" x="95" y="291" width="24" height="16"/>
+  <text class="tiny" x="133" y="304">repository or persistence read</text>
+  <rect class="fail" x="95" y="318" width="24" height="16"/>
+  <text class="tiny" x="133" y="331">terminal response; chain stops</text>
+  <rect class="alternate" x="95" y="342" width="24" height="9"/>
+  <text class="tiny" x="133" y="351">allowed alternate continuation</text>
+
+  <!-- Startup -->
+  <rect class="setup" x="545" y="165" width="490" height="118"/>
+  <text class="h1" x="790" y="191" text-anchor="middle">0A. Startup: resolve source-controlled path policy</text>
+  <text class="h2" x="790" y="217" text-anchor="middle">SecurityPathPolicy.jwtBypass()</text>
+  <text class="small" x="790" y="241" text-anchor="middle">Returns the immutable JWT-bypass matcher list</text>
+  <text class="code" x="790" y="263" text-anchor="middle">security/config/SecurityPathPolicy.java</text>
+
+  <rect class="setup" x="545" y="325" width="490" height="122"/>
+  <text class="h1" x="790" y="351" text-anchor="middle">0B. Startup: construct and order the filter</text>
+  <text class="h2" x="790" y="377" text-anchor="middle">ProductPortalSecurityConfig.customSecurityFilterChain()</text>
+  <text class="small" x="790" y="401" text-anchor="middle">new JwtTokenValidatorFilter(jwtBypass, dependencies)</text>
+  <text class="code" x="790" y="423" text-anchor="middle">addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)</text>
+
+  <rect class="setup" x="1175" y="165" width="550" height="282"/>
+  <text class="h1" x="1450" y="191" text-anchor="middle">Security chain created once at application startup</text>
+  <text class="small" x="1205" y="222">1. CSRF disabled</text>
+  <text class="small" x="1205" y="247">2. CORS configuration applied</text>
+  <text class="small" x="1205" y="272">3. SessionCreationPolicy.STATELESS</text>
+  <text class="small" x="1205" y="297">4. permitAll matchers registered</text>
+  <text class="small" x="1205" y="322">5. authenticated matchers registered</text>
+  <text class="small" x="1205" y="347">6. anyRequest().denyAll()</text>
+  <text class="small" x="1205" y="372">7. JWT filter inserted before username/password filter</text>
+  <line class="divider" x1="1205" y1="392" x2="1695" y2="392"/>
+  <text class="tiny" x="1450" y="418" text-anchor="middle">This setup does not repeat for each HTTP request.</text>
+
+  <path class="line" d="M790 283 L790 325"/>
+
+  <!-- Per-request framework entry -->
+  <rect class="provider" x="545" y="505" width="490" height="100"/>
+  <text class="h1" x="790" y="531" text-anchor="middle">1. Request enters the Spring Security filter chain</text>
+  <text class="h2" x="790" y="556" text-anchor="middle">OncePerRequestFilter.doFilter()</text>
+  <text class="tiny" x="790" y="580" text-anchor="middle">Framework checks dispatch state, already-filtered state, and skip rules.</text>
+  <path class="line" d="M790 447 L790 505"/>
+
+  <polygon class="decision" points="790,650 1000,725 790,800 580,725"/>
+  <text class="h1" x="790" y="704" text-anchor="middle">2. Should this URI skip JWT validation?</text>
+  <text class="h2" x="790" y="729" text-anchor="middle">JwtTokenValidatorFilter.shouldNotFilter(request)</text>
+  <text class="tiny" x="790" y="753" text-anchor="middle">AntPathMatcher compares request.getRequestURI() with jwtBypassPaths.</text>
+  <path class="line" d="M790 605 L790 650"/>
+
+  <rect class="alternate" x="70" y="650" width="350" height="150"/>
+  <text class="h1" x="245" y="677" text-anchor="middle">YES: JWT-bypass path</text>
+  <text class="small" x="245" y="703" text-anchor="middle">OncePerRequestFilter skips doFilterInternal()</text>
+  <text class="small" x="245" y="727" text-anchor="middle">and invokes filterChain.doFilter(...).</text>
+  <text class="tiny" x="245" y="753" text-anchor="middle">No JWT is parsed and no Authentication is created.</text>
+  <text class="warn" x="245" y="779" text-anchor="middle">Continues to downstream authorization.</text>
+  <path class="lineAlt" d="M580 725 L420 725"/>
+  <text class="warn" x="468" y="707">YES</text>
+
+  <rect class="runtime" x="545" y="855" width="490" height="108"/>
+  <text class="h1" x="790" y="881" text-anchor="middle">3. OncePerRequestFilter invokes doFilterInternal()</text>
+  <text class="h2" x="790" y="907" text-anchor="middle">JwtTokenValidatorFilter.doFilterInternal(...)</text>
+  <text class="small" x="790" y="931" text-anchor="middle">The filter's try/catch boundary starts here.</text>
+  <text class="code" x="790" y="951" text-anchor="middle">Runs at most once for this request dispatch.</text>
+  <path class="line" d="M790 800 L790 855"/>
+  <text class="ok" x="820" y="826">NO</text>
+
+  <!-- Header resolution -->
+  <rect class="runtime" x="545" y="1015" width="490" height="112"/>
+  <text class="h1" x="790" y="1041" text-anchor="middle">4. Resolve the Authorization header</text>
+  <text class="h2" x="790" y="1067" text-anchor="middle">resolveBearerToken(request)</text>
+  <text class="small" x="790" y="1091" text-anchor="middle">Missing header returns Optional.empty().</text>
+  <text class="tiny" x="790" y="1113" text-anchor="middle">Wrong scheme or empty Bearer value throws BadCredentialsException.</text>
+  <path class="line" d="M790 963 L790 1015"/>
+
+  <rect class="trigger" x="1175" y="1015" width="550" height="112"/>
+  <text class="h1" x="1450" y="1041" text-anchor="middle">HTTP request input</text>
+  <text class="code" x="1450" y="1067" text-anchor="middle">request.getHeader(ApplicationConstants.JWT_HEADER)</text>
+  <text class="small" x="1450" y="1091" text-anchor="middle">Expected syntax: Authorization: Bearer token-value</text>
+  <text class="tiny" x="1450" y="1113" text-anchor="middle">The raw token is not logged.</text>
+  <path class="lineDash" d="M1035 1071 L1175 1071"/>
+
+  <polygon class="decision" points="790,1170 995,1240 790,1310 585,1240"/>
+  <text class="h1" x="790" y="1225" text-anchor="middle">5. Is a bearer token present?</text>
+  <text class="small" x="790" y="1250" text-anchor="middle">Optional returned by resolveBearerToken()</text>
+  <text class="tiny" x="790" y="1271" text-anchor="middle">Presence controls JWT validation; absence is not an exception.</text>
+  <path class="line" d="M790 1127 L790 1170"/>
+
+  <rect class="alternate" x="70" y="1168" width="350" height="145"/>
+  <text class="h1" x="245" y="1195" text-anchor="middle">NO: token is absent</text>
+  <text class="small" x="245" y="1221" text-anchor="middle">No Authentication is placed in the context.</text>
+  <text class="small" x="245" y="1245" text-anchor="middle">The filter later calls filterChain.doFilter(...).</text>
+  <text class="tiny" x="245" y="1271" text-anchor="middle">permitAll can proceed; authenticated routes are</text>
+  <text class="warn" x="245" y="1293" text-anchor="middle">decided by downstream Spring Security.</text>
+  <path class="lineAlt" d="M585 1240 L420 1240"/>
+  <text class="warn" x="469" y="1222">NO</text>
+
+  <!-- JWT parsing -->
+  <rect class="provider" x="545" y="1360" width="490" height="124"/>
+  <text class="h1" x="790" y="1386" text-anchor="middle">6. Parse and cryptographically verify the JWT</text>
+  <text class="h2" x="790" y="1412" text-anchor="middle">jwtUtil.parseSignedClaims(bearerToken.get())</text>
+  <text class="small" x="790" y="1436" text-anchor="middle">Verifies signature, configured issuer, and expiration.</text>
+  <text class="tiny" x="790" y="1460" text-anchor="middle">Only verified claims are used by subsequent steps.</text>
+  <path class="line" d="M790 1310 L790 1360"/>
+  <text class="ok" x="820" y="1335">YES</text>
+
+  <rect class="provider" x="1175" y="1360" width="550" height="124"/>
+  <text class="h1" x="1450" y="1386" text-anchor="middle">JwtUtil and JwtProperties</text>
+  <text class="small" x="1450" y="1412" text-anchor="middle">Signing key verifies token integrity.</text>
+  <text class="small" x="1450" y="1436" text-anchor="middle">Issuer prevents accepting tokens from another issuer.</text>
+  <text class="tiny" x="1450" y="1460" text-anchor="middle">Expiration is enforced by the JJWT parser.</text>
+  <path class="lineDash" d="M1035 1422 L1175 1422"/>
+
+  <rect class="fail" x="70" y="1350" width="350" height="164"/>
+  <text class="h1" x="245" y="1377" text-anchor="middle">ExpiredJwtException</text>
+  <text class="small" x="245" y="1403" text-anchor="middle">SecurityContextHolder.clearContext()</text>
+  <text class="small" x="245" y="1427" text-anchor="middle">writeUnauthorizedResponse("Token expired")</text>
+  <text class="tiny" x="245" y="1451" text-anchor="middle">HttpErrorResponseWriter writes JSON to the</text>
+  <text class="tiny" x="245" y="1471" text-anchor="middle">HttpServletResponse output stream and flushes it.</text>
+  <text class="bad" x="245" y="1495" text-anchor="middle">HTTP 401 - return - chain stops</text>
+  <path class="lineRed" d="M545 1403 L420 1403"/>
+
+  <!-- Invalid-token exception boundary -->
+  <rect class="fail" x="65" y="1560" width="360" height="720"/>
+  <text class="h1" x="245" y="1590" text-anchor="middle">Invalid token / session / access branch</text>
+  <text class="h2" x="245" y="1620" text-anchor="middle">catch (AuthenticationException | JwtException)</text>
+  <line class="divider" x1="90" y1="1642" x2="400" y2="1642"/>
+  <text class="small" x="95" y="1672">Possible sources:</text>
+  <text class="tiny" x="110" y="1697">- malformed Authorization header</text>
+  <text class="tiny" x="110" y="1720">- bad signature, issuer, or malformed JWT</text>
+  <text class="tiny" x="110" y="1743">- missing or invalid userId / subject</text>
+  <text class="tiny" x="110" y="1766">- missing or invalid sessionId</text>
+  <text class="tiny" x="110" y="1789">- missing, inactive, or mismatched session</text>
+  <text class="tiny" x="110" y="1812">- credentials changed after token issuance</text>
+  <text class="tiny" x="110" y="1835">- missing or inactive current-user access</text>
+  <line class="divider" x1="90" y1="1860" x2="400" y2="1860"/>
+  <text class="small" x="245" y="1892" text-anchor="middle">1. SecurityContextHolder.clearContext()</text>
+  <text class="small" x="245" y="1919" text-anchor="middle">2. writeUnauthorizedResponse(...)</text>
+  <text class="code" x="245" y="1946" text-anchor="middle">errorResponseWriter.write(UNAUTHORIZED,</text>
+  <text class="code" x="245" y="1965" text-anchor="middle">"Invalid token")</text>
+  <text class="small" x="245" y="1997" text-anchor="middle">3. Set status, JSON content type, UTF-8,</text>
+  <text class="small" x="245" y="2021" text-anchor="middle">and correlation ID response header</text>
+  <text class="small" x="245" y="2053" text-anchor="middle">4. Serialize ErrorResponseDto to</text>
+  <text class="code" x="245" y="2077" text-anchor="middle">response.getOutputStream()</text>
+  <text class="small" x="245" y="2109" text-anchor="middle">5. response.flushBuffer()</text>
+  <text class="small" x="245" y="2141" text-anchor="middle">6. return from doFilterInternal()</text>
+  <text class="bad" x="245" y="2181" text-anchor="middle">HTTP 401 - filter chain is not continued</text>
+  <text class="tiny" x="245" y="2215" text-anchor="middle">The generic message avoids exposing validation details.</text>
+  <text class="tiny" x="245" y="2238" text-anchor="middle">No controller writes this response.</text>
+
+  <!-- Claim extraction -->
+  <rect class="runtime" x="545" y="1535" width="490" height="108"/>
+  <text class="h1" x="790" y="1561" text-anchor="middle">7. Resolve the user identity</text>
+  <text class="h2" x="790" y="1587" text-anchor="middle">readUserId(claims)</text>
+  <text class="small" x="790" y="1611" text-anchor="middle">Use numeric userId claim; otherwise parse JWT subject.</text>
+  <text class="tiny" x="790" y="1631" text-anchor="middle">Invalid or missing identity throws BadCredentialsException.</text>
+  <path class="line" d="M790 1484 L790 1535"/>
+  <path class="lineRedDash" d="M545 1589 L425 1589"/>
+
+  <rect class="runtime" x="545" y="1690" width="490" height="108"/>
+  <text class="h1" x="790" y="1716" text-anchor="middle">8. Resolve the server-side session identity</text>
+  <text class="h2" x="790" y="1742" text-anchor="middle">readSessionId(claims)</text>
+  <text class="small" x="790" y="1766" text-anchor="middle">Read sessionId claim and parse it as UUID.</text>
+  <text class="tiny" x="790" y="1786" text-anchor="middle">Missing or invalid UUID throws BadCredentialsException.</text>
+  <path class="line" d="M790 1643 L790 1690"/>
+  <path class="lineRedDash" d="M545 1744 L425 1744"/>
+
+  <!-- Session validation -->
+  <rect class="service" x="545" y="1850" width="490" height="135"/>
+  <text class="h1" x="790" y="1876" text-anchor="middle">9. Validate the token against the live session</text>
+  <text class="h2" x="790" y="1902" text-anchor="middle">authSessionService.validateAccessTokenSession(...)</text>
+  <text class="small" x="790" y="1926" text-anchor="middle">Session must exist, be active, and belong to userId.</text>
+  <text class="small" x="790" y="1950" text-anchor="middle">Session must remain valid after credential changes.</text>
+  <text class="tiny" x="790" y="1972" text-anchor="middle">A signed token alone is not sufficient.</text>
+  <path class="line" d="M790 1798 L790 1850"/>
+  <path class="lineRedDash" d="M545 1917 L425 1917"/>
+
+  <rect class="db" x="1175" y="1850" width="550" height="135"/>
+  <text class="h1" x="1450" y="1876" text-anchor="middle">Auth session persistence lookup</text>
+  <text class="h2" x="1450" y="1902" text-anchor="middle">AuthSessionServiceImpl</text>
+  <text class="small" x="1450" y="1926" text-anchor="middle">Loads the auth session and associated user.</text>
+  <text class="small" x="1450" y="1950" text-anchor="middle">Rejects revoked, refresh-expired, mismatched, or stale sessions.</text>
+  <text class="tiny" x="1450" y="1972" text-anchor="middle">Read-only request validation; no session write is expected.</text>
+  <path class="lineDash" d="M1035 1917 L1175 1917"/>
+
+  <!-- Current access -->
+  <rect class="service" x="545" y="2040" width="490" height="155"/>
+  <text class="h1" x="790" y="2066" text-anchor="middle">10. Load current authorization state</text>
+  <text class="h2" x="790" y="2092" text-anchor="middle">currentUserAccessService.loadContextByUserId(userId)</text>
+  <text class="small" x="790" y="2116" text-anchor="middle">Loads the current user, roles, permissions, organization,</text>
+  <text class="small" x="790" y="2140" text-anchor="middle">role assignments, and current account status.</text>
+  <text class="tiny" x="790" y="2164" text-anchor="middle">Authorization is based on current database state, not stale JWT roles.</text>
+  <text class="tiny" x="790" y="2183" text-anchor="middle">Denied access throws an AuthenticationException subtype.</text>
+  <path class="line" d="M790 1985 L790 2040"/>
+  <path class="lineRedDash" d="M545 2117 L425 2117"/>
+
+  <rect class="db" x="1175" y="2040" width="550" height="155"/>
+  <text class="h1" x="1450" y="2066" text-anchor="middle">Current user-access persistence reads</text>
+  <text class="small" x="1450" y="2094" text-anchor="middle">User and account status</text>
+  <text class="small" x="1450" y="2118" text-anchor="middle">Active role assignments</text>
+  <text class="small" x="1450" y="2142" text-anchor="middle">Roles and permissions</text>
+  <text class="small" x="1450" y="2166" text-anchor="middle">Current organization context</text>
+  <path class="lineDash" d="M1035 2117 L1175 2117"/>
+
+  <!-- Authentication creation -->
+  <rect class="provider" x="545" y="2260" width="490" height="112"/>
+  <text class="h1" x="790" y="2286" text-anchor="middle">11. Convert application context to Authentication</text>
+  <text class="h2" x="790" y="2312" text-anchor="middle">authenticationContext.toAuthentication()</text>
+  <text class="small" x="790" y="2336" text-anchor="middle">Creates Spring Authentication with current authorities.</text>
+  <text class="tiny" x="790" y="2358" text-anchor="middle">The result is trusted because all previous checks succeeded.</text>
+  <path class="line" d="M790 2195 L790 2260"/>
+
+  <rect class="provider" x="545" y="2425" width="490" height="116"/>
+  <text class="h1" x="790" y="2451" text-anchor="middle">12. Populate the request security context</text>
+  <text class="h2" x="790" y="2477" text-anchor="middle">SecurityContextHolder.getContext()</text>
+  <text class="code" x="790" y="2501" text-anchor="middle">.setAuthentication(authentication)</text>
+  <text class="tiny" x="790" y="2523" text-anchor="middle">Downstream security and application code can now read the principal.</text>
+  <path class="line" d="M790 2372 L790 2425"/>
+
+  <rect class="provider" x="1175" y="2425" width="550" height="116"/>
+  <text class="h1" x="1450" y="2451" text-anchor="middle">SecurityContextHolder</text>
+  <text class="small" x="1450" y="2477" text-anchor="middle">Holds Authentication for the current request thread.</text>
+  <text class="small" x="1450" y="2501" text-anchor="middle">Spring Security clears its managed context after the request.</text>
+  <text class="tiny" x="1450" y="2523" text-anchor="middle">This application remains stateless; no HTTP session is created.</text>
+  <path class="lineDash" d="M1035 2483 L1175 2483"/>
+
+  <!-- Unexpected exception branch -->
+  <rect class="fail" x="70" y="2330" width="350" height="300"/>
+  <text class="h1" x="245" y="2357" text-anchor="middle">Unexpected Exception</text>
+  <text class="small" x="245" y="2385" text-anchor="middle">Applies to unexpected failures inside the try block.</text>
+  <line class="divider" x1="95" y1="2405" x2="395" y2="2405"/>
+  <text class="small" x="245" y="2435" text-anchor="middle">1. Clear SecurityContext</text>
+  <text class="small" x="245" y="2462" text-anchor="middle">2. Resolve or create correlation ID</text>
+  <text class="small" x="245" y="2489" text-anchor="middle">3. Log stack trace with request URI and ID</text>
+  <text class="small" x="245" y="2516" text-anchor="middle">4. Write generic ErrorResponseDto as JSON</text>
+  <text class="code" x="245" y="2543" text-anchor="middle">response.getOutputStream()</text>
+  <text class="bad" x="245" y="2580" text-anchor="middle">HTTP 500 - return - chain stops</text>
+  <text class="tiny" x="245" y="2607" text-anchor="middle">Internal validation details are not sent to the client.</text>
+  <path class="lineRedDash" d="M545 2470 L420 2470"/>
+
+  <!-- Continue filter chain -->
+  <rect class="runtime" x="545" y="2600" width="490" height="120"/>
+  <text class="h1" x="790" y="2626" text-anchor="middle">13. Continue the filter chain</text>
+  <text class="h2" x="790" y="2652" text-anchor="middle">filterChain.doFilter(request, response)</text>
+  <text class="small" x="790" y="2676" text-anchor="middle">Reached after successful authentication or no bearer token.</text>
+  <text class="tiny" x="790" y="2698" text-anchor="middle">This call is outside the try/catch; downstream exceptions are not rewritten here.</text>
+  <path class="line" d="M790 2541 L790 2600"/>
+
+  <rect class="provider" x="1175" y="2600" width="550" height="120"/>
+  <text class="h1" x="1450" y="2626" text-anchor="middle">Remaining Spring Security filters</text>
+  <text class="small" x="1450" y="2652" text-anchor="middle">Authorization uses the current SecurityContext state.</text>
+  <text class="small" x="1450" y="2676" text-anchor="middle">Allowed requests proceed toward DispatcherServlet and controller.</text>
+  <text class="tiny" x="1450" y="2698" text-anchor="middle">Protected requests without Authentication are rejected downstream.</text>
+  <path class="lineDash" d="M1035 2660 L1175 2660"/>
+
+  <!-- Downstream outcomes -->
+  <polygon class="decision" points="790,2780 1000,2855 790,2930 580,2855"/>
+  <text class="h1" x="790" y="2837" text-anchor="middle">14. What reaches authorization?</text>
+  <text class="small" x="790" y="2862" text-anchor="middle">Path policy plus SecurityContext determine the outcome.</text>
+  <text class="tiny" x="790" y="2884" text-anchor="middle">The JWT filter validates identity; it does not make the final route decision.</text>
+  <path class="line" d="M790 2720 L790 2780"/>
+
+  <rect class="alternate" x="70" y="2790" width="350" height="190"/>
+  <text class="h1" x="245" y="2817" text-anchor="middle">No Authentication</text>
+  <text class="small" x="245" y="2845" text-anchor="middle">Possible causes:</text>
+  <text class="tiny" x="110" y="2870">- bypass path skipped the JWT filter</text>
+  <text class="tiny" x="110" y="2893">- non-bypass request had no token</text>
+  <text class="small" x="245" y="2923" text-anchor="middle">permitAll: request may continue</text>
+  <text class="small" x="245" y="2947" text-anchor="middle">authenticated: Spring rejects the request</text>
+  <text class="warn" x="245" y="2971" text-anchor="middle">No response was written by this filter.</text>
+  <path class="lineAlt" d="M580 2855 L420 2855"/>
+  <text class="warn" x="450" y="2837">NONE</text>
+
+  <rect class="provider" x="545" y="3010" width="490" height="150"/>
+  <text class="h1" x="790" y="3037" text-anchor="middle">Authenticated request continues</text>
+  <text class="small" x="790" y="3065" text-anchor="middle">AuthorizationFilter reads Authentication and authorities.</text>
+  <text class="small" x="790" y="3089" text-anchor="middle">If the path policy allows access, DispatcherServlet selects</text>
+  <text class="small" x="790" y="3113" text-anchor="middle">the controller and the application request flow begins.</text>
+  <text class="ok" x="790" y="3142" text-anchor="middle">JWT validation completed successfully.</text>
+  <path class="line" d="M790 2930 L790 3010"/>
+  <text class="ok" x="820" y="2973">AUTHENTICATED</text>
+
+  <rect class="provider" x="1175" y="2790" width="550" height="370"/>
+  <text class="h1" x="1450" y="2817" text-anchor="middle">SecurityPathPolicy authorization matchers</text>
+  <line class="divider" x1="1205" y1="2838" x2="1695" y2="2838"/>
+  <text class="h2" x="1220" y="2870">permitAll()</text>
+  <text class="small" x="1220" y="2896">Public API and documentation paths can proceed without</text>
+  <text class="small" x="1220" y="2918">an authenticated SecurityContext.</text>
+  <text class="h2" x="1220" y="2960">authenticated()</text>
+  <text class="small" x="1220" y="2986">Protected API paths require Authentication.</text>
+  <text class="h2" x="1220" y="3028">anyRequest().denyAll()</text>
+  <text class="small" x="1220" y="3054">Everything not intentionally listed is denied by default.</text>
+  <line class="divider" x1="1205" y1="3080" x2="1695" y2="3080"/>
+  <text class="tiny" x="1450" y="3110" text-anchor="middle">JWT bypass and permitAll serve different responsibilities:</text>
+  <text class="tiny" x="1450" y="3133" text-anchor="middle">filter execution versus final authorization.</text>
+
+  <!-- Compact pseudocode map -->
+  <rect class="panel" x="70" y="3260" width="1655" height="540"/>
+  <rect class="panelHeader" x="95" y="3285" width="1605" height="52"/>
+  <text class="h1" x="897" y="3318" text-anchor="middle">Compact pseudocode mapped to the implementation</text>
+
+  <text class="code" x="120" y="3375">OncePerRequestFilter.doFilter(request, response, chain)</text>
+  <text class="code" x="145" y="3403">if shouldNotFilter(request):</text>
+  <text class="code" x="170" y="3431">chain.doFilter(request, response)                         // bypass branch</text>
+  <text class="code" x="170" y="3459">return</text>
+
+  <text class="code" x="145" y="3503">doFilterInternal(request, response, chain):</text>
+  <text class="code" x="170" y="3531">try:</text>
+  <text class="code" x="195" y="3559">token = resolveBearerToken(request)</text>
+  <text class="code" x="195" y="3587">if token is present:</text>
+  <text class="code" x="220" y="3615">claims = jwtUtil.parseSignedClaims(token)</text>
+  <text class="code" x="220" y="3643">userId = readUserId(claims)</text>
+  <text class="code" x="220" y="3671">sessionId = readSessionId(claims)</text>
+  <text class="code" x="220" y="3699">authSessionService.validateAccessTokenSession(sessionId, userId)</text>
+  <text class="code" x="220" y="3727">context = currentUserAccessService.loadContextByUserId(userId)</text>
+  <text class="code" x="220" y="3755">SecurityContextHolder.getContext().setAuthentication(context.toAuthentication())</text>
+
+  <line class="divider" x1="940" y1="3360" x2="940" y2="3775"/>
+  <text class="code" x="975" y="3403">catch ExpiredJwtException:</text>
+  <text class="code" x="1000" y="3431">clear context; write HTTP 401 "Token expired"; return</text>
+  <text class="code" x="975" y="3487">catch AuthenticationException or JwtException:</text>
+  <text class="code" x="1000" y="3515">clear context; write HTTP 401 "Invalid token"; return</text>
+  <text class="code" x="975" y="3571">catch Exception:</text>
+  <text class="code" x="1000" y="3599">clear context; log with correlation ID</text>
+  <text class="code" x="1000" y="3627">write generic HTTP 500; return</text>
+  <text class="code" x="975" y="3683">chain.doFilter(request, response)</text>
+  <text class="tiny" x="975" y="3731">Every terminal error writes directly to HttpServletResponse.</text>
+  <text class="tiny" x="975" y="3755">Successful or token-absent requests continue to the next filter.</text>
+
+  <text class="subtitle" x="900" y="3880" text-anchor="middle">Primary code: security/filter/JwtTokenValidatorFilter.java</text>
+  <text class="tiny" x="900" y="3910" text-anchor="middle">Related code: ProductPortalSecurityConfig, SecurityPathPolicy, JwtUtil, AuthSessionService, CurrentUserAccessService, and HttpErrorResponseWriter</text>
+</svg>

@@ -7,8 +7,8 @@ import com.elvencode.productportal.catalog.product.controller.CategoryProductCon
 import com.elvencode.productportal.common.config.web.WebConfig;
 import com.elvencode.productportal.common.web.HttpErrorResponseWriter;
 import com.elvencode.productportal.scopes.ScopeController;
-import com.elvencode.productportal.security.PathsConfig;
 import com.elvencode.productportal.security.config.JwtProperties;
+import com.elvencode.productportal.security.config.SecurityPathPolicy;
 import com.elvencode.productportal.security.filter.JwtTokenValidatorFilter;
 import com.elvencode.productportal.security.service.CurrentUserAccessService;
 import com.elvencode.productportal.security.util.JwtUtil;
@@ -47,8 +47,9 @@ class AuthEndpointSecurityPathAlignmentTest {
         String controllerLoginPath = resolveControllerLoginPath();
         Map<String, Predicate<Class<?>>> pathPrefixes = configuredPathPrefixes();
         Predicate<Class<?>> apiPrefixPredicate = pathPrefixes.get(API_PREFIX);
-        List<String> publicPaths = new PathsConfig().publicPaths();
-        TestableJwtTokenValidatorFilter jwtFilter = new TestableJwtTokenValidatorFilter(publicPaths);
+        List<String> permitAllPaths = SecurityPathPolicy.permitAll();
+        List<String> jwtBypassPaths = SecurityPathPolicy.jwtBypass();
+        TestableJwtTokenValidatorFilter jwtFilter = new TestableJwtTokenValidatorFilter(jwtBypassPaths);
 
         assertThat(controllerLoginPath).isEqualTo(INTERNAL_LOGIN_PATH);
         assertThat(pathPrefixes).containsKey(API_PREFIX);
@@ -62,7 +63,8 @@ class AuthEndpointSecurityPathAlignmentTest {
 
         String externalLoginPath = API_PREFIX + controllerLoginPath;
         assertThat(externalLoginPath).isEqualTo(EXTERNAL_LOGIN_PATH);
-        assertThat(publicPaths).contains(externalLoginPath);
+        assertThat(permitAllPaths).contains(externalLoginPath);
+        assertThat(jwtBypassPaths).contains(externalLoginPath);
         assertThat(jwtFilter.shouldSkip(externalLoginPath)).isTrue();
         assertThat(jwtFilter.shouldSkip(controllerLoginPath)).isFalse();
     }
@@ -109,9 +111,9 @@ class AuthEndpointSecurityPathAlignmentTest {
 
     private static final class TestableJwtTokenValidatorFilter extends JwtTokenValidatorFilter {
 
-        private TestableJwtTokenValidatorFilter(List<String> publicPaths) {
+        private TestableJwtTokenValidatorFilter(List<String> jwtBypassPaths) {
             super(
-                    publicPaths,
+                    jwtBypassPaths,
                     new JwtUtil(
                             new JwtProperties(TEST_JWT_SECRET, Duration.ofMinutes(15), "Product Portal"),
                             Clock.fixed(Instant.parse("2026-07-11T10:00:00Z"), ZoneOffset.UTC)),
