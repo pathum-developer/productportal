@@ -1,5 +1,11 @@
-﻿-- PostgreSQL schema baseline for Product Portal.
--- Managed by Flyway. Do not use Hibernate ddl-auto to mutate production schema.
+--liquibase formatted sql
+--changeset elvencode:001-create-product-portal-schema
+--preconditions onFail:MARK_RAN onError:HALT
+--precondition-sql-check expectedResult:0 SELECT CASE WHEN table_count = 0 AND index_count = 0 THEN 0 WHEN table_count = 23 AND index_count >= 69 THEN 1 ELSE 1 / ((table_count + index_count) - (table_count + index_count)) END FROM (SELECT (SELECT COUNT(*) FROM pg_catalog.pg_class c JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace WHERE n.nspname = current_schema() AND c.relkind IN ('r','p') AND c.relname IN ('pp_m_role','pp_m_permission','pp_r_permission_scope','pp_r_user_status','pp_m_organization','pp_r_membership_status','pp_m_user','pp_t_auth_session','pp_t_login_throttle_state','pp_a_login_attempt','pp_t_user_organization_membership','pp_t_user_role_assignment','pp_t_role_permission_grant','pp_t_user_organization_membership_audit','pp_t_user_role_assignment_audit','pp_t_role_permission_grant_audit','pp_m_user_address','pp_r_category_status','pp_r_brand_status','pp_r_product_status','pp_m_category','pp_m_brand','pp_m_product')) AS table_count, (SELECT COUNT(*) FROM pg_catalog.pg_class i JOIN pg_catalog.pg_namespace n ON n.oid = i.relnamespace WHERE n.nspname = current_schema() AND i.relkind = 'i' AND (i.relname LIKE 'idx_pp_%' OR i.relname = 'uk_pp_t_user_org_membership_one_primary')) AS index_count) existing_baseline
+--comment: Runs only for an empty Product Portal schema. A complete existing Flyway-created schema with baseline indexes is marked as already ran.
+
+-- PostgreSQL schema baseline for Product Portal.
+-- Managed by Liquibase. Do not use Hibernate ddl-auto to mutate production schema.
 
 CREATE TABLE pp_m_role
 (

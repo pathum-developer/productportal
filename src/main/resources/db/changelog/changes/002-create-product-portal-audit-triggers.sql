@@ -1,4 +1,10 @@
-﻿-- PostgreSQL audit and synchronization triggers for Product Portal.
+--liquibase formatted sql
+--changeset elvencode:002-create-product-portal-audit-triggers splitStatements:false
+--preconditions onFail:MARK_RAN onError:HALT
+--precondition-sql-check expectedResult:0 SELECT CASE WHEN COUNT(*) = 0 THEN 0 WHEN COUNT(*) = 9 THEN 1 ELSE 1 / (COUNT(*) - COUNT(*)) END FROM pg_catalog.pg_trigger t JOIN pg_catalog.pg_class c ON c.oid = t.tgrelid JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace WHERE n.nspname = current_schema() AND NOT t.tgisinternal AND t.tgname IN ('trg_pp_t_user_organization_membership_ai','trg_pp_t_user_organization_membership_au','trg_pp_t_user_organization_membership_ad','trg_pp_t_user_role_assignment_ai','trg_pp_t_user_role_assignment_au','trg_pp_t_user_role_assignment_ad','trg_pp_t_role_permission_grant_ai','trg_pp_t_role_permission_grant_au','trg_pp_t_role_permission_grant_ad')
+--comment: Runs only when Product Portal audit triggers are absent. Complete existing trigger sets are marked as already ran.
+
+-- PostgreSQL audit and synchronization triggers for Product Portal.
 -- Custom audit context can be supplied per transaction with SET LOCAL product_portal.<key> = '<value>'.
 
 CREATE OR REPLACE FUNCTION pp_setting(setting_name TEXT)

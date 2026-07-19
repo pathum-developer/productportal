@@ -1,0 +1,25 @@
+databaseChangeLog:
+  - include:
+      file: changes/001-create-product-portal-schema.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changes/002-create-product-portal-audit-triggers.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changes/003-seed-product-portal-reference-access-data.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changes/004-seed-product-portal-reference-status-data.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changes/005-seed-product-portal-default-organization.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changes/006-seed-product-portal-demo-users.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changes/007-seed-product-portal-demo-catalog.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changes/008-update-demo-amal-perera-password-hash.sql
+      relativeToChangelogFile: true

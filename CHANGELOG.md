@@ -11,7 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - PostgreSQL runtime support with PostgreSQL JDBC driver
-- Flyway PostgreSQL schema, trigger, and seed migrations
+- Liquibase PostgreSQL schema, trigger, and seed changesets
+- Flyway to Liquibase production handover guide
 - Two-query fetch-join pagination pattern for scalable user listing
 - Custom multi-column sorting with SQL injection prevention
 - Sort parameter validation via UserSortColumn enum

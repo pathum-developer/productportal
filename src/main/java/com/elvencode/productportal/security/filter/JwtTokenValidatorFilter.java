@@ -16,7 +16,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -39,8 +38,7 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
 
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
-    @Qualifier("publicPaths")
-    private final List<String> publicPaths;
+    private final List<String> jwtBypassPaths;
 
     private final JwtUtil jwtUtil;
     private final CurrentUserAccessService currentUserAccessService;
@@ -52,24 +50,34 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         try {
+            // Resolve the Authorization header. Missing bearer tokens are allowed to continue unauthenticated;
+            // authorization rules later decide whether the requested endpoint requires authentication.
             Optional<String> bearerToken = resolveBearerToken(request);
             if (bearerToken.isPresent()) {
+                // Verify JWT signature, issuer, and expiration before trusting any token claims.
                 Claims claims = jwtUtil.parseSignedClaims(bearerToken.get());
+
+                // Read identity claims, validate the server-side session, then load current user access.
                 Long userId = readUserId(claims);
                 authSessionService.validateAccessTokenSession(readSessionId(claims), userId);
                 ProductPortalAuthenticationContext authenticationContext =
                         currentUserAccessService.loadContextByUserId(userId);
+
+                // Convert the current user, roles, permissions, and account status into Spring Authentication.
                 SecurityContextHolder.getContext().setAuthentication(authenticationContext.toAuthentication());
             }
         } catch (ExpiredJwtException exception) {
+            // Expired tokens are authentication failures and must not leave stale authentication in the context.
             SecurityContextHolder.clearContext();
             writeUnauthorizedResponse(request, response, "Token expired");
             return;
         } catch (AuthenticationException | JwtException exception) {
+            // Invalid tokens, invalid sessions, and denied current-user access all produce a generic 401 response.
             SecurityContextHolder.clearContext();
             writeUnauthorizedResponse(request, response, "Invalid token");
             return;
         } catch (Exception exception) {
+            // Unexpected system failures are logged with a correlation ID while returning a generic 500 response.
             SecurityContextHolder.clearContext();
             String correlationId = CorrelationIdContext.resolveOrCreate(request);
             log.error("Unexpected JWT validation exception for request {}. correlationId={}",
@@ -81,15 +89,18 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
                     GENERIC_INTERNAL_SERVER_ERROR_MESSAGE);
             return;
         }
+
+        // Continue the filter chain after either successful authentication or an allowed unauthenticated request.
         filterChain.doFilter(request, response);
 
     }
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
+        // Public endpoints are skipped using source-controlled JWT bypass paths.
         String path = request.getRequestURI();
-        return publicPaths.stream().anyMatch(publicPath ->
-                pathMatcher.match(publicPath, path));
+        return jwtBypassPaths.stream().anyMatch(jwtBypassPath ->
+                pathMatcher.match(jwtBypassPath, path));
     }
 
     private Optional<String> resolveBearerToken(HttpServletRequest request) {
