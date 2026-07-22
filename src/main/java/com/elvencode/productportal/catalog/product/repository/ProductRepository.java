@@ -10,7 +10,7 @@ import java.util.Collection;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
-    @EntityGraph(attributePaths = {"organization", "owner", "category", "brand", "status"})
+    @EntityGraph(attributePaths = {"organization", "category", "brand", "status"})
     Page<Product> findByOrganization_IdAndCategory_IdIn(
             Long organizationId,
             Collection<Long> categoryIds,

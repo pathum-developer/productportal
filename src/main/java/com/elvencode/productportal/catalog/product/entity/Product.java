@@ -5,7 +5,6 @@ import com.elvencode.productportal.catalog.category.entity.Category;
 import com.elvencode.productportal.catalog.reference.entity.ProductStatus;
 import com.elvencode.productportal.common.persistence.BaseEntity;
 import com.elvencode.productportal.organization.entity.Organization;
-import com.elvencode.productportal.user.entity.PortalUser;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -40,10 +39,6 @@ import lombok.ToString;
         },
         indexes = {
                 @Index(name = "idx_pp_m_product_organization_id", columnList = "organization_id"),
-                @Index(name = "idx_pp_m_product_owner_user_id", columnList = "owner_user_id"),
-                @Index(
-                        name = "idx_pp_m_product_org_owner_status",
-                        columnList = "organization_id, owner_user_id, status_code"),
                 @Index(name = "idx_pp_m_product_category_id", columnList = "category_id"),
                 @Index(name = "idx_pp_m_product_brand_id", columnList = "brand_id"),
                 @Index(name = "idx_pp_m_product_status", columnList = "status_code"),
@@ -80,12 +75,6 @@ public class Product extends BaseEntity {
             nullable = false,
             foreignKey = @ForeignKey(name = "fk_pp_m_product_organization"))
     private Organization organization;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "owner_user_id",
-            foreignKey = @ForeignKey(name = "fk_pp_m_product_owner_user"))
-    private PortalUser owner;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

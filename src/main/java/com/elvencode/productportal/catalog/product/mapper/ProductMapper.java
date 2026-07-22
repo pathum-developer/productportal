@@ -10,8 +10,6 @@ import com.elvencode.productportal.catalog.reference.dto.ReferenceStatusResponse
 import com.elvencode.productportal.catalog.reference.entity.ProductStatus;
 import com.elvencode.productportal.organization.dto.response.OrganizationSummaryResponse;
 import com.elvencode.productportal.organization.entity.Organization;
-import com.elvencode.productportal.user.dto.response.UserSummaryResponse;
-import com.elvencode.productportal.user.entity.PortalUser;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -26,7 +24,6 @@ public class ProductMapper {
                 product.getModelNumber(),
                 product.getSkuCode(),
                 toOrganizationSummary(product.getOrganization()),
-                toOwnerSummary(product.getOwner()),
                 toCategorySummary(product.getCategory()),
                 toBrandSummary(product.getBrand()),
                 toStatusResponse(product.getStatus()));
@@ -56,16 +53,6 @@ public class ProductMapper {
                 organization.getOrganizationCode(),
                 organization.getDisplayName(),
                 organization.getActive());
-    }
-
-    private UserSummaryResponse toOwnerSummary(PortalUser owner) {
-        if (owner == null) {
-            return null;
-        }
-        return new UserSummaryResponse(
-                owner.getId(),
-                owner.getUsername(),
-                owner.getFullName());
     }
 
     private ReferenceStatusResponse toStatusResponse(ProductStatus status) {

@@ -20,6 +20,14 @@ databaseChangeLog:
   - include:
       file: changes/007-seed-product-portal-demo-catalog.sql
       relativeToChangelogFile: true
+      # Retained solely for the historical checksum. New demo catalog data is seeded by 010.
+      contextFilter: legacy-product-owner-demo
   - include:
       file: changes/008-update-demo-amal-perera-password-hash.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changes/009-remove-product-user-ownership.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changes/010-seed-organization-owned-demo-catalog.sql
       relativeToChangelogFile: true
