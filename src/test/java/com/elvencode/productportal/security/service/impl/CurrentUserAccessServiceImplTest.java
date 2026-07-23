@@ -54,7 +54,7 @@ class CurrentUserAccessServiceImplTest {
     @Test
     void shouldBuildContextFromCurrentUserRolesAndPermissions() {
         PortalUser portalUser = activeUser();
-        UserRoleAssignment assignment = activeAssignment("ADMIN", 1, 7L);
+        UserRoleAssignment assignment = activeAssignment("ADMIN", 1);
         RolePermissionGrant grant = activePermissionGrant("PRODUCT_READ", 1);
 
         when(userRepository.findById(42L)).thenReturn(Optional.of(portalUser));
@@ -67,7 +67,7 @@ class CurrentUserAccessServiceImplTest {
 
         assertThat(context.principal().userId()).isEqualTo(42L);
         assertThat(context.principal().username()).isEqualTo("alice");
-        assertThat(context.principal().primaryOrganizationId()).isEqualTo(7L);
+        assertThat(context.principal().organizationId()).isEqualTo(7L);
         assertThat(context.principal().roleCodes()).containsExactly("ADMIN");
         assertThat(context.principal().permissionCodes()).containsExactly("PRODUCT_READ");
         assertThat(context.authorities())
@@ -105,6 +105,20 @@ class CurrentUserAccessServiceImplTest {
         verifyNoInteractions(rolePermissionGrantRepository);
     }
 
+    @Test
+    void shouldRejectUserWithoutAssignedOrganization() {
+        PortalUser portalUser = activeUser();
+        when(portalUser.getOrganization()).thenReturn(null);
+
+        when(userRepository.findById(42L)).thenReturn(Optional.of(portalUser));
+
+        assertThatThrownBy(() -> service.loadContextByUserId(42L))
+                .isInstanceOf(CurrentUserAccessDeniedException.class)
+                .satisfies(exception -> assertThat(((CurrentUserAccessDeniedException) exception).reason())
+                        .isEqualTo(CurrentUserAccessDeniedException.Reason.ORGANIZATION_NOT_ASSIGNED));
+        verifyNoInteractions(userRoleAssignmentRepository, rolePermissionGrantRepository);
+    }
+
     private PortalUser activeUser() {
         UserStatus status = mock(UserStatus.class);
         when(status.getStatusCode()).thenReturn("ACTIVE");
@@ -116,22 +130,20 @@ class CurrentUserAccessServiceImplTest {
         when(portalUser.getEmail()).thenReturn("alice@example.test");
         when(portalUser.getPhoneNumber()).thenReturn("+94111111111");
         when(portalUser.getStatus()).thenReturn(status);
-        when(portalUser.getPrimaryOrganization()).thenReturn(null);
+        Organization organization = mock(Organization.class);
+        when(organization.getId()).thenReturn(7L);
+        when(portalUser.getOrganization()).thenReturn(organization);
         return portalUser;
     }
 
-    private UserRoleAssignment activeAssignment(String roleCode, int sortOrder, Long organizationId) {
+    private UserRoleAssignment activeAssignment(String roleCode, int sortOrder) {
         Role role = mock(Role.class);
         when(role.getRoleCode()).thenReturn(roleCode);
         when(role.getSortOrder()).thenReturn(sortOrder);
 
-        Organization organization = mock(Organization.class);
-        when(organization.getId()).thenReturn(organizationId);
-
         UserRoleAssignment assignment = mock(UserRoleAssignment.class);
         when(assignment.isCurrentlyActive(any(Instant.class))).thenReturn(true);
         when(assignment.getRole()).thenReturn(role);
-        when(assignment.getOrganization()).thenReturn(organization);
         return assignment;
     }
 

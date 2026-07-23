@@ -53,6 +53,7 @@ public class CurrentUserAccessServiceImpl implements CurrentUserAccessService {
                     CurrentUserAccessDeniedException.Reason.ACCOUNT_DISABLED);
         }
 
+        Long organizationId = resolveOrganizationId(portalUser);
         List<UserRoleAssignment> activeAssignments = loadActiveRoleAssignments(portalUser);
         if (activeAssignments.isEmpty()) {
             throw new CurrentUserAccessDeniedException(
@@ -61,14 +62,13 @@ public class CurrentUserAccessServiceImpl implements CurrentUserAccessService {
 
         List<String> roleCodes = extractRoleCodes(activeAssignments);
         List<String> permissionCodes = loadPermissionCodes(roleCodes);
-        Long primaryOrganizationId = resolvePrimaryOrganizationId(portalUser, activeAssignments);
 
         ProductPortalUserPrincipal principal = new ProductPortalUserPrincipal(
                 portalUser.getId(),
                 portalUser.getUsername(),
                 portalUser.getEmail(),
                 portalUser.getPhoneNumber(),
-                primaryOrganizationId,
+                organizationId,
                 roleCodes,
                 permissionCodes,
                 portalUser.getStatus().getStatusCode());
@@ -81,6 +81,14 @@ public class CurrentUserAccessServiceImpl implements CurrentUserAccessService {
     private boolean canAccountAuthenticate(PortalUser portalUser) {
         return ACTIVE_STATUS_CODE.equals(portalUser.getStatus().getStatusCode())
                 && Boolean.TRUE.equals(portalUser.getStatus().getActive());
+    }
+
+    private Long resolveOrganizationId(PortalUser portalUser) {
+        if (portalUser.getOrganization() == null || portalUser.getOrganization().getId() == null) {
+            throw new CurrentUserAccessDeniedException(
+                    CurrentUserAccessDeniedException.Reason.ORGANIZATION_NOT_ASSIGNED);
+        }
+        return portalUser.getOrganization().getId();
     }
 
     private List<UserRoleAssignment> loadActiveRoleAssignments(PortalUser portalUser) {
@@ -112,15 +120,6 @@ public class CurrentUserAccessServiceImpl implements CurrentUserAccessService {
                 .map(grant -> grant.getPermission().getPermissionCode())
                 .distinct()
                 .toList();
-    }
-
-    private Long resolvePrimaryOrganizationId(
-            PortalUser portalUser,
-            List<UserRoleAssignment> activeAssignments) {
-        if (portalUser.getPrimaryOrganization() != null) {
-            return portalUser.getPrimaryOrganization().getId();
-        }
-        return activeAssignments.get(0).getOrganization().getId();
     }
 
     private List<GrantedAuthority> buildAuthorities(List<String> roleCodes, List<String> permissionCodes) {

@@ -8,7 +8,7 @@ public record ProductPortalUserPrincipal(
         String username,
         String email,
         String phoneNumber,
-        Long primaryOrganizationId,
+        Long organizationId,
         List<String> roleCodes,
         List<String> permissionCodes,
         String statusCode

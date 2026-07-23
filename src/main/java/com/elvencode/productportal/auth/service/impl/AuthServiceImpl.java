@@ -64,7 +64,7 @@ public class AuthServiceImpl implements AuthService {
                         principal.userId(),
                         principal.username(),
                         principal.statusCode(),
-                        principal.primaryOrganizationId()),
+                        principal.organizationId()),
                 new LoginResponse.AccessContextResponse(
                         principal.roleCodes(),
                         principal.permissionCodes()));

@@ -7,10 +7,6 @@ import com.elvencode.productportal.access.role.repository.RoleRepository;
 import com.elvencode.productportal.common.exception.ResourceConflictException;
 import com.elvencode.productportal.common.exception.ResourceNotFoundException;
 import com.elvencode.productportal.organization.entity.Organization;
-import com.elvencode.productportal.organization.membership.entity.UserOrganizationMembership;
-import com.elvencode.productportal.organization.membership.repository.UserOrganizationMembershipRepository;
-import com.elvencode.productportal.organization.reference.entity.MembershipStatus;
-import com.elvencode.productportal.organization.reference.repository.MembershipStatusRepository;
 import com.elvencode.productportal.organization.repository.OrganizationRepository;
 import com.elvencode.productportal.user.dto.request.UserRegistrationRequest;
 import com.elvencode.productportal.user.entity.PortalUser;
@@ -29,7 +25,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -46,7 +41,6 @@ public class UserServiceImpl implements UserService {
     private static final String DEFAULT_REGISTRATION_ORGANIZATION_CODE = "DEFAULT";
     private static final String DEFAULT_REGISTRATION_ROLE_CODE = "BUYER";
     private static final String DEFAULT_REGISTRATION_STATUS_CODE = "ACTIVE";
-    private static final String DEFAULT_MEMBERSHIP_STATUS_CODE = "ACTIVE";
     private static final String SYSTEM_ACTOR = "SYSTEM";
     private static final String REGISTRATION_ASSIGNMENT_REASON = "Default role assigned during user registration.";
 
@@ -54,8 +48,6 @@ public class UserServiceImpl implements UserService {
     private final RoleRepository roleRepository;
     private final UserStatusRepository userStatusRepository;
     private final OrganizationRepository organizationRepository;
-    private final MembershipStatusRepository membershipStatusRepository;
-    private final UserOrganizationMembershipRepository membershipRepository;
     private final UserRoleAssignmentRepository roleAssignmentRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
@@ -97,12 +89,6 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "UserStatus", "code", DEFAULT_REGISTRATION_STATUS_CODE));
 
-        MembershipStatus membershipStatus = membershipStatusRepository
-                .findById(DEFAULT_MEMBERSHIP_STATUS_CODE)
-                .filter(value -> Boolean.TRUE.equals(value.getActive()))
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "MembershipStatus", "code", DEFAULT_MEMBERSHIP_STATUS_CODE));
-
         PortalUser portalUser = PortalUser.register(
                 username,
                 fullName,
@@ -114,19 +100,9 @@ public class UserServiceImpl implements UserService {
 
         try {
             PortalUser savedUser = userRepository.saveAndFlush(portalUser);
-            UserOrganizationMembership membership = UserOrganizationMembership.primaryMembership(
-                    savedUser,
-                    organization,
-                    membershipStatus,
-                    Instant.now());
-            UserOrganizationMembership savedMembership = membershipRepository.saveAndFlush(membership);
-            savedUser.addMembership(savedMembership);
-
             UserRoleAssignment assignment = UserRoleAssignment.assign(
                     savedUser,
-                    organization,
                     role,
-                    savedMembership,
                     SYSTEM_ACTOR,
                     REGISTRATION_ASSIGNMENT_REASON);
             UserRoleAssignment savedAssignment = roleAssignmentRepository.saveAndFlush(assignment);

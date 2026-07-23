@@ -34,9 +34,6 @@ import java.time.Instant;
                         name = "idx_pp_t_role_permission_grant_audit_permission_time",
                         columnList = "permission_code, changed_at"),
                 @Index(
-                        name = "idx_pp_t_role_permission_grant_audit_scope_time",
-                        columnList = "new_scope_code, changed_at"),
-                @Index(
                         name = "idx_pp_t_role_permission_grant_audit_event_time",
                         columnList = "event_type, changed_at"),
                 @Index(
@@ -78,14 +75,6 @@ public class RolePermissionGrantAudit {
 
     @Column(name = "new_active")
     private Boolean newActive;
-
-    @Size(max = 30)
-    @Column(name = "previous_scope_code", length = 30)
-    private String previousScopeCode;
-
-    @Size(max = 30)
-    @Column(name = "new_scope_code", length = 30)
-    private String newScopeCode;
 
     @Size(max = 100)
     @Column(name = "assigned_by", length = 100)

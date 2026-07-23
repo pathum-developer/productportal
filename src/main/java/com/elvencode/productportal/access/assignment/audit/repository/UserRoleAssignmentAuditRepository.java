@@ -7,8 +7,7 @@ import java.util.List;
 
 public interface UserRoleAssignmentAuditRepository extends JpaRepository<UserRoleAssignmentAudit, Long> {
 
-    List<UserRoleAssignmentAudit> findByUserIdAndOrganizationIdAndRoleCodeOrderByChangedAtDesc(
+    List<UserRoleAssignmentAudit> findByUserIdAndRoleCodeOrderByChangedAtDesc(
             Long userId,
-            Long organizationId,
             String roleCode);
 }

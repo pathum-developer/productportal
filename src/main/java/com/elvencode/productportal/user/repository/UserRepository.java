@@ -17,24 +17,16 @@ public interface UserRepository extends JpaRepository<PortalUser, Long> {
 
     @EntityGraph(attributePaths = {
             "status",
-            "primaryOrganization",
-            "memberships.organization",
-            "memberships.membershipStatus",
+            "organization",
             "roleAssignments.role",
-            "roleAssignments.organization",
-            "roleAssignments.membership.membershipStatus",
             "addresses"
     })
     Optional<PortalUser> findPortalUserByUsername(String username);
 
     @EntityGraph(attributePaths = {
             "status",
-            "primaryOrganization",
-            "memberships.organization",
-            "memberships.membershipStatus",
-            "roleAssignments.role",
-            "roleAssignments.organization",
-            "roleAssignments.membership.membershipStatus"
+            "organization",
+            "roleAssignments.role"
     })
     Optional<PortalUser> findByUsername(String username);
 
@@ -46,12 +38,8 @@ public interface UserRepository extends JpaRepository<PortalUser, Long> {
 
     @EntityGraph(attributePaths = {
             "status",
-            "primaryOrganization",
-            "memberships.organization",
-            "memberships.membershipStatus",
-            "roleAssignments.role",
-            "roleAssignments.organization",
-            "roleAssignments.membership.membershipStatus"
+            "organization",
+            "roleAssignments.role"
     })
     List<PortalUser> findAllByStatus(UserStatus status);
     /**
@@ -81,12 +69,8 @@ public interface UserRepository extends JpaRepository<PortalUser, Long> {
 
     @EntityGraph(attributePaths = {
             "status",
-            "primaryOrganization",
-            "memberships.organization",
-            "memberships.membershipStatus",
+            "organization",
             "roleAssignments.role",
-            "roleAssignments.organization",
-            "roleAssignments.membership.membershipStatus",
             "addresses"
     })
     @Query("SELECT DISTINCT p FROM PortalUser p WHERE p.id IN :ids")

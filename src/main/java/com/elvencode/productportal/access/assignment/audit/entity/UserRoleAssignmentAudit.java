@@ -28,11 +28,11 @@ import java.time.Instant;
         name = "pp_t_user_role_assignment_audit",
         indexes = {
                 @Index(
-                        name = "idx_pp_t_user_role_assignment_audit_user_org_time",
-                        columnList = "user_id, organization_id, changed_at"),
+                        name = "idx_pp_t_user_role_assignment_audit_user_role_time",
+                        columnList = "user_id, role_code, changed_at"),
                 @Index(
-                        name = "idx_pp_t_user_role_assignment_audit_org_time",
-                        columnList = "organization_id, changed_at"),
+                        name = "idx_pp_t_user_role_assignment_audit_user_time",
+                        columnList = "user_id, changed_at"),
                 @Index(
                         name = "idx_pp_t_user_role_assignment_audit_role_time",
                         columnList = "role_code, changed_at"),
@@ -61,10 +61,6 @@ public class UserRoleAssignmentAudit {
     @NotNull
     @Column(name = "user_id", nullable = false)
     private Long userId;
-
-    @NotNull
-    @Column(name = "organization_id", nullable = false)
-    private Long organizationId;
 
     @NotBlank
     @Size(max = 30)

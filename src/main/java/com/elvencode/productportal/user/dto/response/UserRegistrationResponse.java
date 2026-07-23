@@ -13,9 +13,8 @@ public record UserRegistrationResponse(
         String fullName,
         String email,
         String phoneNumber,
-        OrganizationSummaryResponse primaryOrganization,
+        OrganizationSummaryResponse organization,
         List<RoleSummaryResponse> roles,
-        List<UserMembershipResponse> memberships,
         UserReferenceResponse status,
         Instant createdAt
 ) {

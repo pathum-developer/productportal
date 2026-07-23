@@ -41,7 +41,7 @@ public class UserController {
 
     @Operation(
             summary = "Register user",
-            description = "Creates an ACTIVE user account with a primary organization membership and default role assignment."
+            description = "Creates an ACTIVE user account in one organization with a default role assignment."
     )
     @ApiResponses({
             @ApiResponse(
@@ -75,7 +75,7 @@ public class UserController {
 
     @Operation(
             summary = "Get user details by username",
-            description = "Returns user account details with organization memberships, role assignments, status, audit metadata, and all addresses."
+            description = "Returns user account details with organization, role assignments, status, audit metadata, and all addresses."
     )
     @ApiResponses({
             @ApiResponse(

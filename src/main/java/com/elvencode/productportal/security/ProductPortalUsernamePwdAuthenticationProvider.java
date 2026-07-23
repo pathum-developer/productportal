@@ -100,6 +100,7 @@ public class ProductPortalUsernamePwdAuthenticationProvider implements Authentic
     private LoginAttemptOutcome toLoginAttemptOutcome(CurrentUserAccessDeniedException exception) {
         return switch (exception.reason()) {
             case ACCOUNT_DISABLED -> LoginAttemptOutcome.ACCOUNT_DISABLED;
+            case ORGANIZATION_NOT_ASSIGNED -> LoginAttemptOutcome.ACCOUNT_DISABLED;
             case NO_ACTIVE_ROLE_ASSIGNMENT -> LoginAttemptOutcome.NO_ACTIVE_ROLE_ASSIGNMENT;
             case USER_NOT_FOUND -> LoginAttemptOutcome.BAD_CREDENTIALS;
         };

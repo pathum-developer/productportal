@@ -1,6 +1,5 @@
 package com.elvencode.productportal.access.permission.entity;
 
-import com.elvencode.productportal.access.permission.reference.entity.PermissionScope;
 import com.elvencode.productportal.access.role.entity.Role;
 import com.elvencode.productportal.common.persistence.BaseEntity;
 import jakarta.persistence.Column;
@@ -30,11 +29,7 @@ import lombok.ToString;
         name = "pp_t_role_permission_grant",
         indexes = {
                 @Index(name = "idx_pp_t_role_permission_grant_permission_code", columnList = "permission_code"),
-                @Index(name = "idx_pp_t_role_permission_grant_scope_code", columnList = "scope_code"),
                 @Index(name = "idx_pp_t_role_permission_grant_role_active", columnList = "role_code, is_active"),
-                @Index(
-                        name = "idx_pp_t_role_permission_grant_permission_scope_active",
-                        columnList = "permission_code, scope_code, is_active"),
                 @Index(
                         name = "idx_pp_t_role_permission_grant_permission_active",
                         columnList = "permission_code, is_active"),
@@ -70,14 +65,6 @@ public class RolePermissionGrant extends BaseEntity {
     private Permission permission;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(
-            name = "scope_code",
-            nullable = false,
-            foreignKey = @ForeignKey(name = "fk_pp_t_role_permission_grant_scope"))
-    private PermissionScope scope;
-
-    @NotNull
     @Column(name = "is_active", nullable = false)
     private Boolean active = Boolean.TRUE;
 
@@ -103,8 +90,6 @@ public class RolePermissionGrant extends BaseEntity {
                 && role != null
                 && Boolean.TRUE.equals(role.getActive())
                 && permission != null
-                && Boolean.TRUE.equals(permission.getActive())
-                && scope != null
-                && Boolean.TRUE.equals(scope.getActive());
+                && Boolean.TRUE.equals(permission.getActive());
     }
 }

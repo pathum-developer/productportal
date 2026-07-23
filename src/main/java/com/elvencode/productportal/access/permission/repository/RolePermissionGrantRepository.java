@@ -10,12 +10,12 @@ import java.util.List;
 
 public interface RolePermissionGrantRepository extends JpaRepository<RolePermissionGrant, RolePermissionGrantId> {
 
-    @EntityGraph(attributePaths = {"role", "permission", "scope"})
+    @EntityGraph(attributePaths = {"role", "permission"})
     List<RolePermissionGrant> findByRole_RoleCodeAndActiveTrue(String roleCode);
 
-    @EntityGraph(attributePaths = {"role", "permission", "scope"})
+    @EntityGraph(attributePaths = {"role", "permission"})
     List<RolePermissionGrant> findByRole_RoleCodeInAndActiveTrue(Collection<String> roleCodes);
 
-    @EntityGraph(attributePaths = {"role", "permission", "scope"})
+    @EntityGraph(attributePaths = {"role", "permission"})
     List<RolePermissionGrant> findByPermission_PermissionCodeAndActiveTrue(String permissionCode);
 }

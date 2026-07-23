@@ -31,7 +31,7 @@ public class CategoryProductController {
             @AuthenticationPrincipal ProductPortalUserPrincipal currentUser,
             @PageableDefault(size = 20, sort = "name") Pageable pageable) {
         return ResponseEntity.ok(productService.getProductsByCategoryIdIncludingSubcategories(
-                currentUser.primaryOrganizationId(), categoryId, pageable));
+                currentUser.organizationId(), categoryId, pageable));
     }
 
 }

@@ -1,12 +1,15 @@
 package com.elvencode.productportal.organization.entity;
 
+import com.elvencode.productportal.catalog.product.entity.Product;
 import com.elvencode.productportal.common.persistence.BaseEntity;
+import com.elvencode.productportal.user.entity.PortalUser;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.Version;
@@ -19,7 +22,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.NaturalId;
+
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -70,6 +77,14 @@ public class Organization extends BaseEntity {
     @NotNull
     @Column(name = "is_active", nullable = false)
     private Boolean active = Boolean.TRUE;
+
+    @OneToMany(mappedBy = "organization")
+    @BatchSize(size = 50)
+    private Set<PortalUser> users = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "organization")
+    @BatchSize(size = 50)
+    private Set<Product> products = new LinkedHashSet<>();
 
     @Version
     @Column(name = "version", nullable = false)

@@ -18,6 +18,7 @@ public class CurrentUserAccessDeniedException extends AuthenticationException {
     public enum Reason {
         USER_NOT_FOUND("Authenticated user no longer exists"),
         ACCOUNT_DISABLED("Authenticated user account is not active"),
+        ORGANIZATION_NOT_ASSIGNED("Authenticated user has no assigned organization"),
         NO_ACTIVE_ROLE_ASSIGNMENT("Authenticated user has no active role assignments");
 
         private final String message;

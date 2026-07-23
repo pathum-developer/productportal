@@ -31,3 +31,18 @@ databaseChangeLog:
   - include:
       file: changes/010-seed-organization-owned-demo-catalog.sql
       relativeToChangelogFile: true
+  - include:
+      file: changes/011-enforce-single-user-organization.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changes/012-drop-user-organization-membership-tables.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changes/013-remove-organization-from-user-role-assignment.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changes/014-remove-organization-from-user-role-assignment-audit.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changes/015-remove-permission-scope.sql
+      relativeToChangelogFile: true

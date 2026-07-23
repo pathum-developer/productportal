@@ -21,7 +21,7 @@ public record LoginResponse(
             Long userId,
             String username,
             String statusCode,
-            Long primaryOrganizationId
+            Long organizationId
     ) {
     }
 

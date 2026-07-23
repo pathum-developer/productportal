@@ -21,9 +21,6 @@ public class UserRoleAssignmentId implements Serializable {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @Column(name = "organization_id", nullable = false)
-    private Long organizationId;
-
     @Column(name = "role_code", nullable = false, length = 30)
     private String roleCode;
 }

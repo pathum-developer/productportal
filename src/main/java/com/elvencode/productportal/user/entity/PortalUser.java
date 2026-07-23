@@ -4,7 +4,6 @@ import com.elvencode.productportal.access.assignment.entity.UserRoleAssignment;
 import com.elvencode.productportal.access.role.entity.Role;
 import com.elvencode.productportal.common.persistence.BaseEntity;
 import com.elvencode.productportal.organization.entity.Organization;
-import com.elvencode.productportal.organization.membership.entity.UserOrganizationMembership;
 import com.elvencode.productportal.user.address.entity.Address;
 import com.elvencode.productportal.user.reference.entity.UserStatus;
 import jakarta.persistence.CascadeType;
@@ -55,7 +54,7 @@ import java.util.Set;
         },
         indexes = {
                 @Index(name = "idx_pp_m_user_status", columnList = "status"),
-                @Index(name = "idx_pp_m_user_primary_organization_id", columnList = "primary_organization_id")
+                @Index(name = "idx_pp_m_user_organization_id", columnList = "organization_id")
         }
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -102,11 +101,13 @@ public class PortalUser extends BaseEntity {
     @Column(name = "credentials_changed_at", nullable = false)
     private Instant credentialsChangedAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
-            name = "primary_organization_id",
-            foreignKey = @ForeignKey(name = "fk_pp_m_user_primary_organization"))
-    private Organization primaryOrganization;
+            name = "organization_id",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_pp_m_user_organization"))
+    private Organization organization;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -123,10 +124,6 @@ public class PortalUser extends BaseEntity {
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     @BatchSize(size = 20)
-    private Set<UserOrganizationMembership> memberships = new LinkedHashSet<>();
-
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    @BatchSize(size = 20)
     private Set<UserRoleAssignment> roleAssignments = new LinkedHashSet<>();
 
     @Version
@@ -140,7 +137,7 @@ public class PortalUser extends BaseEntity {
             String phoneNumber,
             String passwordHash,
             UserStatus status,
-            Organization primaryOrganization) {
+            Organization organization) {
         PortalUser portalUser = new PortalUser();
         portalUser.username = username;
         portalUser.fullName = fullName;
@@ -149,7 +146,7 @@ public class PortalUser extends BaseEntity {
         portalUser.passwordHash = passwordHash;
         portalUser.credentialsChangedAt = Instant.now();
         portalUser.status = status;
-        portalUser.primaryOrganization = primaryOrganization;
+        portalUser.organization = organization;
         return portalUser;
     }
 
@@ -169,11 +166,6 @@ public class PortalUser extends BaseEntity {
                         .comparing((UserRoleAssignment assignment) -> assignment.getRole().getSortOrder())
                         .thenComparing(assignment -> assignment.getRole().getRoleCode()))
                 .toList();
-    }
-
-    public void addMembership(UserOrganizationMembership membership) {
-        memberships.add(membership);
-        membership.setUser(this);
     }
 
     public void addRoleAssignment(UserRoleAssignment roleAssignment) {
